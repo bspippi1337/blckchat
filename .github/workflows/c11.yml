@@ -1,16 +1,25 @@
-name: C11 core and BLCKUI
+name: C11 core, BLCKUI and security engine
 on:
   push:
   pull_request:
+permissions:
+  contents: read
 jobs:
   portable:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Build and test
+      - name: Install OpenSSL development files (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev
+      - name: Install OpenSSL development files (macOS)
+        if: runner.os == 'macOS'
+        run: brew install openssl@3 pkg-config && echo "PKG_CONFIG_PATH=$(brew --prefix openssl@3)/lib/pkgconfig" >> "$GITHUB_ENV"
+      - name: Build and test C11
         run: make clean && make test
-      - name: Check SVG preview
+      - name: Confirm SVG preview exists
         run: test -s blckchat-preview.svg
