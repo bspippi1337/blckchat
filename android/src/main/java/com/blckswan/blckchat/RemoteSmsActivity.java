@@ -147,10 +147,20 @@ public final class RemoteSmsActivity extends Activity {
         body=col();body.setPadding(dp(20),dp(25),dp(20),dp(40));
         outer.addView(body);setContentView(outer);
         conversationViews.clear();
-        TextView eyebrow=label("BLCK / CHAT     42 · SMS FIRST",12,accent,true);
-        eyebrow.setLetterSpacing(.16f);body.addView(eyebrow,match());
+        // The same approved artwork used on the website is bundled locally.
+        // No network access, animation or separate assets to download.
+        android.widget.ImageView wordmark=new android.widget.ImageView(this);
+        wordmark.setImageResource(R.drawable.blckchat_wordmark);
+        wordmark.setContentDescription(
+            "BLCKCHAT 42. C-en i CHAT har en diskret fedora.");
+        wordmark.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+        wordmark.setAdjustViewBounds(true);
+        wordmark.setMaxHeight(dp(175));
+        body.addView(wordmark,match());
+        TextView eyebrow=label("SMS FIRST · EXPERIMENTAL ALPHA",11,accent,true);
+        eyebrow.setLetterSpacing(.16f);gap(eyebrow,0);
         TextView title=label("Avstand er ikke et hinder.",31,FG,true);
-        gap(title,16);
+        gap(title,19);
         paragraph("Ekte krypterte meldinger over operatørens SMS-nett. "
             +"Ingen felles Wi-Fi, GitHub-innlogging eller server.",13);
         status=label("Nøkkelen din lagres lokalt i Android Keystore.",12,accent,false);
