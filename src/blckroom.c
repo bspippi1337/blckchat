@@ -208,7 +208,7 @@ blck_status blck_room_issue_otp(blck_room *room,const char *locator,
         return BLCK_UNAUTHORIZED;
     if (now>=invite->invite_expires) return BLCK_EXPIRED;
     if (invite->issues>=BLCK_OTP_MAX_ISSUES ||
-        (invite->issues && now-invite->last_issued<BLCK_OTP_COOLDOWN))
+        (invite->issues && (now<invite->last_issued || now-invite->last_issued<BLCK_OTP_COOLDOWN)))
         return BLCK_LIMIT;
     if (generate_otp(otp)) return BLCK_INTERNAL;
     if (digest_otp(room,invite,otp,digest)) {
