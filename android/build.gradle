@@ -9,8 +9,8 @@ android {
         applicationId 'com.blckswan.blckchat'
         minSdk 26
         targetSdk 35
-        versionCode 2
-        versionName '0.2.1-sms.experimental'
+        versionCode 3
+        versionName '0.3.0-sms-segments.experimental'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         ndk {
             abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
