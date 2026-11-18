@@ -88,4 +88,4 @@ cc -std=c11 -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer \
 ```
 
 No public APK should be described as a working messenger until actual
-Pippi–Trond–Thomas end-to-end message delivery has been verified on devices.
+Phone A (Admin)–Phone B–Phone C end-to-end message delivery has been verified on devices.
