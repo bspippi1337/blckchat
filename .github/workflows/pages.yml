@@ -27,14 +27,55 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Determine whether app code changed
+        id: delta
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" != "push" ]] ||
+             ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null ||
+             ! git diff --quiet "$BEFORE" "$AFTER" -- \
+               android/ src/blckui.c include/blckui.h \
+               settings.gradle build.gradle gradle.properties \
+               .github/workflows/pages.yml ; then
+            echo "rebuild=true" >> "$GITHUB_OUTPUT"
+            echo "App source changed: build fresh signed debug APK"
+          else
+            echo "rebuild=false" >> "$GITHUB_OUTPUT"
+            echo "Site-only change: retain the previously published APK"
+          fi
+      - name: Reuse verified public APK when only site files changed
+        if: steps.delta.outputs.rebuild == 'false'
+        run: |
+          set -euo pipefail
+          mkdir -p site/downloads
+          BASE="https://bspippi1337.github.io/blckchat/downloads"
+          curl --fail --location --silent --show-error --retry 3 \
+            --connect-timeout 10 --max-time 90 \
+            "$BASE/blckchat-sms-experimental.apk" \
+            --output site/downloads/blckchat-sms-experimental.apk
+          curl --fail --location --silent --show-error --retry 3 \
+            --connect-timeout 10 --max-time 30 \
+            "$BASE/SHA256SUMS.txt" --output site/downloads/SHA256SUMS.txt
+          cd site/downloads
+          sha256sum --check SHA256SUMS.txt
+          unzip -tq blckchat-sms-experimental.apk
+          test -s blckchat-sms-experimental.apk
       - uses: actions/setup-java@v4
+        if: steps.delta.outputs.rebuild == 'true'
         with:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
+        if: steps.delta.outputs.rebuild == 'true'
         with:
           gradle-version: '8.9'
       - name: Resolve Android SDK
+        if: steps.delta.outputs.rebuild == 'true'
         run: |
           set -euo pipefail
           SDK_ROOT="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
@@ -42,6 +83,7 @@ jobs:
           test -x "$SDKMANAGER"
           "$SDKMANAGER" --sdk_root="$SDK_ROOT" --install "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.2.12479018"
       - name: Verify portable SMS and crypto protocol logic
+        if: steps.delta.outputs.rebuild == 'true'
         run: |
           mkdir -p /tmp/blckchat-java-tests
           javac -d /tmp/blckchat-java-tests \
@@ -52,10 +94,13 @@ jobs:
           java -cp /tmp/blckchat-java-tests com.blckswan.blckchat.SmsFrameAssemblerTest
           java -cp /tmp/blckchat-java-tests com.blckswan.blckchat.SmsCryptoPrimitivesTest
       - name: Static Android lint
+        if: steps.delta.outputs.rebuild == 'true'
         run: gradle --no-daemon :android:lintDebug
       - name: Build SMS-first experimental APK
+        if: steps.delta.outputs.rebuild == 'true'
         run: gradle --no-daemon --stacktrace :android:assembleDebug
       - name: Verify and stage experimental build
+        if: steps.delta.outputs.rebuild == 'true'
         run: |
           set -euo pipefail
           APK="android/build/outputs/apk/debug/android-debug.apk"
@@ -68,17 +113,20 @@ jobs:
           mkdir -p site/downloads
           cp "$APK" site/downloads/blckchat-sms-experimental.apk
           (cd site/downloads && sha256sum blckchat-sms-experimental.apk > SHA256SUMS.txt)
-          test -s site/downloads/blckchat-sms-experimental.apk
-      - name: Verify SMS app requests no network or SMS permissions
+      - name: Verify public APK metadata and permissions
         run: |
           set -euo pipefail
+          APK="site/downloads/blckchat-sms-experimental.apk"
+          test -s "$APK"
+          (cd site/downloads && sha256sum --check SHA256SUMS.txt)
           AAPT="${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools/35.0.0/aapt"
-          "$AAPT" dump permissions site/downloads/blckchat-sms-experimental.apk > /tmp/blckchat-perms.txt
+          test -x "$AAPT"
+          "$AAPT" dump permissions "$APK" > /tmp/blckchat-perms.txt
           if grep -E 'android.permission.(INTERNET|SEND_SMS|READ_SMS|RECEIVE_SMS)' /tmp/blckchat-perms.txt; then
             echo "Refusing to publish over-permissioned SMS alpha" >&2
             exit 1
           fi
-          "$AAPT" dump badging site/downloads/blckchat-sms-experimental.apk | grep -F "com.blckswan.blckchat.RemoteSmsActivity"
+          "$AAPT" dump badging "$APK" | grep -F "com.blckswan.blckchat.RemoteSmsActivity"
       - uses: actions/configure-pages@v5
       - name: Upload site and verified experimental APK
         uses: actions/upload-pages-artifact@v3
