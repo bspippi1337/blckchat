@@ -15,6 +15,22 @@ A minimal GitHub-backed group messenger, written primarily in ISO C11.
 
 **A gateway is necessary.** GitHub cannot safely accept anonymous guest messages directly to a private repository. A small C11 gateway authenticates guest sessions, stores the administrator's GitHub credential outside the repository, validates permissions and acts as the only GitHub API writer/reader. GitHub Actions and Pages are *not* a substitute for an always-available private gateway.
 
+## Release policy: first APK must actually message
+
+**No demo-only APK release.** An Android artifact must not be named or advertised as the first release unless it passes end-to-end integration tests with the actual HTTPS gateway, a private GitHub-backed room and two independently authenticated guests.
+
+Required acceptance checks:
+1. Admin configures GitHub credentials server-side and provisions a private channel.
+2. Guest A and B enroll without GitHub accounts using distinct short-lived, one-time SMS credentials; no secrets leak into GitHub Pages.
+3. A sends a text message, B receives it; B replies and A receives it on a separate device/process.
+4. Messages persist through app restart and are sourced from GitHub-backed storage or a durable synchronized queue.
+5. A revoked guest cannot read or post; expired or reused OTPs are rejected.
+6. Bad network, 429/rate-limit, conflicting writes and offline/reconnection have defined recovery.
+7. TLS verification is active, tokens are scoped and stored securely, no plaintext credentials in APK or git.
+8. APK is signed, installable, and download link points to the actual produced binary.
+
+Build jobs may generate internal test artifacts during development; public download labels must distinguish prefunctional artifacts and not claim a working messenger. An internet-reachable gateway deployment, SMS provider, and admin GitHub authorization are prerequisites. A GitHub Pages-only deployment is insufficient.
+
 ## State
 
 **Alpha 0.1: foundation only.** Local CLI journal, build and tests. No working GitHub gateway, SMS sending, invites, guest sessions or encryption yet. Do not use it for sensitive conversations. GitHub transport is eventual-consistency, not real-time.
