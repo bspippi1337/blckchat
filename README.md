@@ -15,13 +15,19 @@ A minimal GitHub-backed group messenger, written primarily in ISO C11.
 
 **A gateway is necessary.** GitHub cannot safely accept anonymous guest messages directly to a private repository. A small C11 gateway authenticates guest sessions, stores the administrator's GitHub credential outside the repository, validates permissions and acts as the only GitHub API writer/reader. GitHub Actions and Pages are *not* a substitute for an always-available private gateway.
 
-## Current development direction: REMOTE SMS E2EE, not LAN-only
+## Active Android build: REMOTE SMS Alpha 2
 
-**The next working messenger must work between geographically separated phones.** Phone A (Admin), Phone B and Phone C are public role names. First transport: carrier SMS with verified end-to-end encryption and clear onboarding. Next transport: authenticated mobile-data gateway carrying the same opaque encrypted message envelopes. Wi-Fi sharing must never be a requirement.
+**Phone A (Admin) and Phone B can exchange encrypted SMS messages while in different locations.** Android 12+ is required for the Android Keystore P-256 ECDH implementation. An active SIM and standard SMS app are used; no common Wi-Fi, GitHub account or backend is needed for this two-phone trial.
 
-The existing Wi-Fi APK is a **historical LAN test only** and cannot connect remote participants. It is not E2EE. Do not send it as a substitute for a real remote messenger. A tested C11 `blcksms_frame` codec now fragments and reassembles opaque ciphertext, but an audited E2EE provider, identity verification and Android SMS ciphertext UX are still missing.
+[**Install the experimental SMS APK**](https://bspippi1337.github.io/blckchat/join.html)
+· [**Simple Norwegian setup**](https://bspippi1337.github.io/blckchat/guide.html)
+· [**GitHub Actions APK**](https://github.com/bspippi1337/blckchat/actions/workflows/android-test.yml)
 
-[Remote SMS E2EE implementation plan](docs/REMOTE_SMS_E2EE.md) · [Security constraints](SECURITY.md)
+The first SMS link carries only the administrator's **public** key in a URL fragment. The recipient installs the app, reopens the SMS link, then imports the prefilled public key and sends back their own public key. Both devices MUST compare a security code independently before activating encryption. Android's standard SMS app sends ciphertext, and recipients manually paste/share the encrypted SMS to BLCKCHAT for decryption. The C11 SMS frame layer handles packet framing.
+
+**Not audited; NOT equivalent to Signal.** This experimental static ECDH scheme has no Double Ratchet, forward secrecy against long-term key compromise, group E2EE, background SMS reading, durable chat history or cloud data transport. Phone C and mobile-data delivery are later work. Do not use this test for sensitive communications. The older LAN APK is archived development history only.
+
+[Remote cryptographic engineering plan](docs/REMOTE_SMS_E2EE.md) · [Security](SECURITY.md)
 
 ## Android LAN Alpha: real test messages
 
