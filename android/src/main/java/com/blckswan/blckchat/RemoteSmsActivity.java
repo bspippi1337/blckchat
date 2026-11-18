@@ -45,6 +45,7 @@ public final class RemoteSmsActivity extends Activity {
     private TextView status,fingerprint,decrypted;
     private CheckBox verified;
     private TextView sendButton;
+    private TextView outboxProgress;
     private LinearLayout pairingPanel;
 
     private int dp(int value){ return (int)(value*getResources().getDisplayMetrics().density+.5f); }
@@ -200,6 +201,9 @@ public final class RemoteSmsActivity extends Activity {
         gap(action("ÅPNE UTSENDING / NESTE SMS-DEL",false,v->retryDraft()),8);
         gap(action("BEKREFT DENNE SMS-DELEN",false,v->confirmDraft()),8);
         gap(action("FORKAST UTSENDING",false,v->discardDraft()),8);
+        outboxProgress=label("",12,accent,true);
+        gap(outboxProgress,10);
+        updateOutboxProgress();
         paragraph("BLCKCHAT åpner én kryptert SMS-del om gangen. Bekreft manuelt "+
             "at akkurat den delen ble sendt før neste åpnes. Fremdriften "+
             "lagres også når appen starter på nytt.",10);
@@ -334,8 +338,27 @@ public final class RemoteSmsActivity extends Activity {
             String wire=crypto.encrypt(plain);
             drafts.remember(wire);
             outgoing.setText("");
+            updateOutboxProgress();
             showCurrentPart();
         }catch(Exception ex){showFailure(ex);}
+    }
+
+    private void updateOutboxProgress(){
+        if(outboxProgress==null || drafts==null)return;
+        try {
+            if(drafts.pending()==null) {
+                outboxProgress.setText("UTBOKS · Ingen uavklarte krypterte SMS-er");
+            }else {
+                outboxProgress.setText("UTBOKS · Venter på bekreftelse for del "+
+                    (drafts.currentPartIndex()+1)+" av "+drafts.partCount());
+            }
+        }catch(Exception ex){
+            outboxProgress.setText("UTBOKS · Sjekk lagret SMS-utkast");
+        }
+    }
+    @Override protected void onResume(){
+        super.onResume();
+        updateOutboxProgress();
     }
 
     private void showCurrentPart(){
@@ -345,13 +368,13 @@ public final class RemoteSmsActivity extends Activity {
                 status("Ingen uavklart kryptert SMS ligger i utboksen.");
                 return;
             }
-            phone();
+            String recipient=phone();
             int current=drafts.currentPartIndex()+1;
             int total=drafts.partCount();
             if(part.length()>153)
                 throw new SecurityException("SMS-rammen er for lang");
             new AlertDialog.Builder(this).setTitle("Kryptert SMS · del "+current+"/"+total)
-                .setMessage("Nå åpner vi nøyaktig ÉN SMS-del (maks 153 tegn). "+
+                .setMessage("Mottaker: "+recipient+". Nå åpner vi nøyaktig ÉN SMS-del (maks 153 tegn). "+
                     "Kontroller mottakeren og trykk Send i SMS-appen. "+
                     "Kom så tilbake og trykk «BEKREFT DENNE SMS-DELEN» "+
                     "for å gå videre. Hver del kan koste én SMS.")
@@ -387,6 +410,7 @@ public final class RemoteSmsActivity extends Activity {
                 .setPositiveButton("Ja, sendt",(dialog,which)->{
                     try {
                         boolean finished=drafts.confirmCurrentPart();
+                        updateOutboxProgress();
                         if(finished)
                             status("Alle "+total+" SMS-deler er manuelt bekreftet "+
                                 "sendt. Levering til mottakeren er ikke verifisert.");
@@ -411,6 +435,7 @@ public final class RemoteSmsActivity extends Activity {
                 .setPositiveButton("Forkast utkast",(dialog,which)->{
                     try{
                         drafts.clear();
+                        updateOutboxProgress();
                         status("Kryptert SMS-utkast forkastet.");
                     }catch(Exception ex){showFailure(ex);}
                 }).show();
@@ -453,7 +478,7 @@ public final class RemoteSmsActivity extends Activity {
                 +"og sammenligne sikkerhetskoden på nytt. Lokal egen nøkkel beholdes.")
             .setNegativeButton("Avbryt",null)
             .setPositiveButton("Fjern paring",(d,w)->{
-                try{crypto.forgetPeer();inbox.clear();drafts.clear();peerCode.setText("");
+                try{crypto.forgetPeer();inbox.clear();drafts.clear();updateOutboxProgress();peerCode.setText("");
                     decrypted.setText("Ingen melding dekryptert.");
                     updatePairing();status("Paring fjernet.");
                 }catch(Exception e){showFailure(e);}
