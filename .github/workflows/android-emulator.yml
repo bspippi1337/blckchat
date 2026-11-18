@@ -5,14 +5,12 @@ on:
     branches: [main]
     paths:
       - 'android/src/androidTest/**'
-      - 'android/src/main/**'
-      - 'android/build.gradle'
       - '.github/workflows/android-emulator.yml'
 permissions:
   contents: read
 concurrency:
   group: sms-emulator-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   device:
     runs-on: ubuntu-latest
