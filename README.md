@@ -31,6 +31,20 @@ Required acceptance checks:
 
 Build jobs may generate internal test artifacts during development; public download labels must distinguish prefunctional artifacts and not claim a working messenger. An internet-reachable gateway deployment, SMS provider, and admin GitHub authorization are prerequisites. A GitHub Pages-only deployment is insufficient.
 
+## Administrator phone as SMS gateway
+
+**Chosen design:** the administrator's **Android** phone sends invitations and login-code SMS using its own SIM. The C11 `blcksms` library formats messages and validates recipients; a tiny Android system adapter uses the platform's SMS facilities. Guests on Android and iOS receive SMS as normal and do not need a GitHub account.
+
+- **Default:** open prefilled SMS in the phone's messaging app for administrator confirmation (no special SMS permission).
+- **Optional admin-only mode:** send automatically after explicit admin opt-in and Android `SEND_SMS` permission. This permission is tightly restricted on Google Play; do not request it in the ordinary guest app.
+- **Gateway interaction:** the authenticated HTTPS gateway holds short-lived SMS jobs and OTP verification state; the admin handset polls or receives push jobs, sends and acknowledges them. GitHub Pages is *not* the gateway.
+- **Two-stage invitation:** first SMS carries an install/link locator that is NOT an authentication token. After installation, a new eight-digit OTP is created by the gateway and SMS-sent by the admin phone. The OTP expires in ten minutes. Token issuance, hashing, limits and one-time redemption belong server-side.
+- **Offline behavior:** if the admin handset is offline, new invite/OTP SMS must be queued or held with clear status. Already enrolled users should keep chatting through the separate online gateway.
+- **Costs:** third-party SMS-provider fees are avoided, but carrier SMS charges and limits may still apply.
+- **iOS:** supported as a guest client; iOS does not provide an unattended SMS gateway through MessageUI.
+
+The formatting module and Android adapter are present, with native C11 formatter tests. **This is not yet an operative SMS gateway or a working messenger APK.** Device registration, job transport, OTP validation, delivery acknowledgement and actual app packaging are still pending. See [Android adapter](android/README.md).
+
 ## State
 
 **Alpha 0.1: foundation only.** Local CLI journal, build and tests. No working GitHub gateway, SMS sending, invites, guest sessions or encryption yet. Do not use it for sensitive conversations. GitHub transport is eventual-consistency, not real-time.
