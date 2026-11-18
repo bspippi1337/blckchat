@@ -148,6 +148,50 @@ public final class SmsAndroidInstrumentedTest {
         assertEquals(0,new SmsDraftStore(context).partCount());
     }
 
+    @Test public void encryptedLocalHistoryKeepsNoPlaintextAndRejectsTampering()
+        throws Exception {
+        Context context=InstrumentationRegistry.getInstrumentation().getTargetContext();
+        SmsLocalHistory journal=new SmsLocalHistory(context);
+        journal.clear();
+        String peer="a".repeat(64);
+        String otherPeer="b".repeat(64);
+        String id="aabbccddeeff00112233445566778899";
+        String secret="Test SMS 42: confidential journal entry";
+        journal.add("MOTTATT",peer,id,secret);
+        SmsLocalHistory restored=new SmsLocalHistory(context);
+        java.util.List<SmsLocalHistory.Entry> entries=restored.latest(peer,12);
+        assertEquals(1,entries.size());
+        assertEquals(secret,entries.get(0).text);
+        assertEquals(id,entries.get(0).messageId);
+        assertEquals("MOTTATT",entries.get(0).direction);
+        assertTrue(restored.latest(otherPeer,12).isEmpty());
+
+        android.database.sqlite.SQLiteDatabase db=restored.getWritableDatabase();
+        String rid;
+        byte[] sealed;
+        try(android.database.Cursor cursor=db.rawQuery(
+            "SELECT rid,nonce,sealed FROM journal LIMIT 1",null)) {
+            assertTrue(cursor.moveToFirst());
+            rid=cursor.getString(0);
+            assertEquals(12,cursor.getBlob(1).length);
+            sealed=cursor.getBlob(2);
+        }
+        // The disk representation contains only AES-GCM ciphertext.
+        assertFalse(new String(sealed,java.nio.charset.StandardCharsets.ISO_8859_1)
+            .contains(secret));
+        sealed[sealed.length-1]^=1;
+        android.content.ContentValues values=new android.content.ContentValues();
+        values.put("sealed",sealed);
+        assertEquals(1,db.update("journal",values,"rid=?",new String[]{rid}));
+        boolean rejected=false;
+        try{restored.latest(peer,12);}
+        catch(javax.crypto.AEADBadTagException expected){rejected=true;}
+        assertTrue("Modified AES-GCM journal data must fail closed",rejected);
+        restored.clear();
+        journal.close();
+        restored.close();
+    }
+
     @Test public void appDoesNotRequestSmsOrInternetPermissions() throws Exception {
         Context context=InstrumentationRegistry.getInstrumentation().getTargetContext();
         PackageInfo info=context.getPackageManager().getPackageInfo(
