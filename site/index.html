@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090e15">
+<meta name="description" content="BLCKCHAT 42. One GitHub-backed room. Invite everyone else by SMS.">
+<title>BLCKCHAT 42 · Conversation, distilled.</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<a class="skip" href="#content">Skip to content</a>
+<header class="nav shell">
+<a href="./" class="identity"><img src="icon.svg" width="34" height="34" alt=""><span>BLCK<span class="muted">/</span>CHAT <sup>42</sup></span></a>
+<nav aria-label="Primary"><a href="#downloads">Download</a><a href="#manual">Guide</a><a href="#architecture">Architecture</a><a href="https://github.com/bspippi1337/blckchat">Source <span aria-hidden="true">↗</span></a></nav>
+</header>
+<main id="content">
+<section class="hero shell">
+<div class="eyebrow"><span class="pulse"></span> OPEN DEVELOPMENT · ALPHA FOUNDATION</div>
+<div class="hero-grid">
+<div class="hero-copy"><p class="kicker">LESS SETUP. MORE CONVERSATION.</p>
+<h1>Conversation,<br><em>distilled.</em></h1>
+<p class="lede">One person creates the room with GitHub. Everyone else joins through a short-lived SMS invite. Same conversation, no GitHub account needed for guests.</p>
+<div class="cta"><a href="#downloads" class="button primary">Explore downloads <span aria-hidden="true">↗</span></a><a href="#manual" class="button secondary">Read the guide</a></div>
+<p class="fine">Designed in C11 · One visual identity across iOS, Android, macOS, Windows and Linux.</p>
+</div>
+<div class="device-frame" aria-label="Illustration of the planned BLCKCHAT interface. This is a concept, not a working app.">
+<div class="device-head"><span class="device-logo">B<span>/</span>C</span><span class="room-state"><i></i> DESIGN CONCEPT</span><span class="dots">•••</span></div>
+<div class="room-head"><div class="avatar avatar-main">W</div><div><b>The Workshop</b><small>Private group room</small></div><span class="members">◌ 04</span></div>
+<div class="chat-messages">
+<div class="day">TODAY · 14:42</div>
+<div class="bubble incoming"><small>Alex</small>Welcome in. No GitHub account required.</div>
+<div class="bubble outgoing"><small>You</small>Now that's the kind of setup I like.</div>
+<div class="bubble incoming"><small>Charlie</small>And it looks good on every screen.</div>
+<div class="bubble outgoing"><small>You</small>That wasn't optional. <span aria-hidden="true">✦</span></div>
+</div><div class="compose"><span>Write a message…</span><span class="send">↑</span></div>
+</div>
+</div></section>
+<section class="section shell" id="downloads"><div class="section-head"><div><p class="kicker">01 / DISTRIBUTION</p><h2>Downloads</h2></div><p class="section-note">Only verified GitHub Release assets appear here. No pretend APKs, installers or App Store links.</p></div>
+<div id="release-status" class="status" role="status">Checking public GitHub Releases…</div>
+<div id="release-assets" class="downloads-grid" aria-live="polite"></div>
+<div class="panel subtle"><p><strong>Looking for a build?</strong> This is an early-stage C11 project. The source is available now; public app binaries will appear here automatically when they have been built and attached to a GitHub Release.</p><a class="text-link" href="https://github.com/bspippi1337/blckchat/releases">All releases ↗</a> <a class="text-link" href="https://github.com/bspippi1337/blckchat">Browse source ↗</a></div>
+</section>
+<section class="section shell" id="manual"><div class="section-head"><div><p class="kicker">02 / GETTING STARTED</p><h2>One room. Everyone invited.</h2></div><p class="section-note">Planned onboarding flow. Login, SMS delivery and guest gateway are not yet live.</p></div>
+<div class="steps"><article><span class="num">01</span><h3>Create</h3><p>The administrator connects GitHub and creates a private channel.</p></article><article><span class="num">02</span><h3>Invite</h3><p>Send a single-use SMS invitation that expires after ten minutes.</p></article><article><span class="num">03</span><h3>Talk</h3><p>Guests open the link and join the same room. No GitHub account required.</p></article></div>
+<div class="manual-links"><a href="guide.html" class="guide-link"><span><b>Getting started guide</b><small>How it will work, from room creation to guest invites</small></span><span aria-hidden="true">↗</span></a><a href="security.html" class="guide-link"><span><b>Security and privacy</b><small>What the design protects, and what isn't built yet</small></span><span aria-hidden="true">↗</span></a></div>
+</section>
+<section class="section shell" id="architecture"><div class="section-head"><div><p class="kicker">03 / ENGINEERING</p><h2>Portable by design.</h2></div></div><div class="architecture"><div class="arch-row"><div>BLCKUI <span>Custom C11 interface and design system</span></div><div>BLCKCHAT CORE <span>Messages · Rooms · Sync</span></div><div>GATEWAY <span>Sessions · Invitations · GitHub transport</span></div><div>GITHUB <span>Private room repository</span></div></div><div class="arch-copy"><h3>One codebase. Many surfaces.</h3><p>The application logic and UI scene model live in our own C11 libraries. Thin operating-system adapters handle windows, accessibility, text input and secure credential storage.</p><p>GitHub Pages serves this public site and download discovery. It is <strong>not</strong> the private guest messaging gateway. Invitation tokens must never be published here.</p><a class="text-link" href="https://github.com/bspippi1337/blckchat/blob/main/docs/GUI.md">Explore BLCKUI architecture ↗</a></div></div></section>
+</main>
+<footer class="footer shell"><div class="identity"><img src="icon.svg" width="24" height="24" alt="">BLCK/CHAT 42</div><div>Made for conversations, not configuration.</div><a href="https://github.com/bspippi1337/blckchat">GitHub ↗</a></footer>
+<script src="site.js" defer></script>
+</body></html>
