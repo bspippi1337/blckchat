@@ -1,5 +1,12 @@
 # BLCKCHAT 42
 
+**Website source:** [`site/`](site/) · **Planned Pages URL:** https://bspippi1337.github.io/blckchat/ · **Releases:** https://github.com/bspippi1337/blckchat/releases
+
+The Pages deployment workflow is in `.github/workflows/pages.yml`. In GitHub **Settings → Pages → Build and deployment**, select **GitHub Actions**. Publication requires a successful workflow and may need repository Pages settings enabled.
+
+The site is public-facing only: downloads, guides, project information. The private guest gateway is a separate C11 service; never store invite tokens, administrator credentials or private chat content in Pages.
+
+
 A minimal GitHub-backed group messenger, written primarily in ISO C11.
 
 ## Product model
