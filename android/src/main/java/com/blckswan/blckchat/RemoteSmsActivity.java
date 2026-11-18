@@ -38,6 +38,7 @@ public final class RemoteSmsActivity extends Activity {
     private static final int BORDER=0xff354954;
     private int accent;
     private SmsE2ee crypto;
+    private SmsFrameInbox inbox;
     private LinearLayout body;
     private EditText phone,peerCode,outgoing,incoming;
     private TextView status,fingerprint,decrypted;
@@ -109,7 +110,10 @@ public final class RemoteSmsActivity extends Activity {
         getWindow().setStatusBarColor(BG);
         getWindow().setNavigationBarColor(BG);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        try{crypto=new SmsE2ee(this);}catch(Exception ex){
+        try{
+            crypto=new SmsE2ee(this);
+            inbox=new SmsFrameInbox(this);
+        }catch(Exception ex){
             showUnsupported(ex);return;
         }
         render();
@@ -195,13 +199,15 @@ public final class RemoteSmsActivity extends Activity {
         TextView incomingLabel=label("03 / LES EN KRYPTERT SMS",18,FG,true);
         gap(incomingLabel,32);
         incoming=input("KOPIER HELE SMS-TEKSTEN INN HER","BC42|1|…",true);
-        gap(action("DEKRYPTER MOTTATT MELDING",false,v->decrypt()),12);
+        gap(action("DEKRYPTER / LEGG TIL SMS-DEL",false,v->decrypt()),12);
+        gap(action("SLETT UFERDIGE SMS-DELER",false,v->clearIncomplete()),9);
         decrypted=label("Innkommende melding vises her etter godkjent autentisering.",
             15,SUB,false);
         decrypted.setPadding(dp(15),dp(15),dp(15),dp(15));
         decrypted.setBackground(panel(PANEL,12));gap(decrypted,16);
-        paragraph("Tips: Del SMS-tekst til BLCKCHAT fra SMS-appen dersom den støtter Del. "
-            +"Ingen READ_SMS- eller SEND_SMS-tillatelse kreves.",15);
+        paragraph("Hvis en melding kommer som flere SMS-er: lim inn én del av gangen. "
+            +"Delene lagres kryptert, uansett rekkefølge, også ved omstart. "
+            +"Tips: bruk Del-funksjonen i SMS-appen. Ingen SMS-tilgang kreves.",15);
         gap(action("BRUKSANVISNING OG KILDEKODE",false,v->{
             startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(
                 "https://bspippi1337.github.io/blckchat/")));
@@ -282,12 +288,32 @@ public final class RemoteSmsActivity extends Activity {
     private void decrypt(){
         try{
             String text=incoming.getText().toString().trim();
-            String plain=crypto.decrypt(text);
+            SmsFrameAssembler.Result receipt=inbox.accept(text);
+            incoming.setText("");
+            if(receipt.state==SmsFrameAssembler.State.PENDING){
+                status("Mottatt "+receipt.received+" av "+receipt.expected+
+                    " krypterte SMS-deler. Lim inn neste del når den kommer.");
+                return;
+            }
+            // Completion of SMS fragments is not proof of authenticity.
+            String plain=crypto.decrypt(receipt.completeWire);
+            inbox.acknowledged(receipt.id);
             decrypted.setText("MOTTATT OG AUTENTISERT\n"+plain);
             decrypted.setTextColor(FG);
-            incoming.setText("");
-            status("Krypteringsintegritet og duplikatsjekk bestått.");
+            status("Alle SMS-deler mottatt. Integritet og duplikatsjekk bestått.");
         }catch(Exception ex){showFailure(ex);}
+    }
+    private void clearIncomplete(){
+        new AlertDialog.Builder(this)
+            .setTitle("Slette ufullstendige SMS-er?")
+            .setMessage("Bare mellomlagrede krypterte SMS-deler slettes. "+
+                "Ingen telefonmeldinger eller krypteringsnøkler påvirkes.")
+            .setNegativeButton("Avbryt",null)
+            .setPositiveButton("Slett delene",(dialog,which)->{
+                try{inbox.clear();
+                    status("Uferdige krypterte SMS-deler er slettet.");
+                }catch(Exception ex){showFailure(ex);}
+            }).show();
     }
     private void askForget(){
         new AlertDialog.Builder(this).setTitle("Fjerne paring?")
