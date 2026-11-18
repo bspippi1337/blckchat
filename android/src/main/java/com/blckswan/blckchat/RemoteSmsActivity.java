@@ -237,10 +237,17 @@ public final class RemoteSmsActivity extends Activity {
         startActivity(sms);
     }
     private void sendKey(){
-        try{composeSms("BLCKCHAT 42 offentlig nøkkel:\n"+
-            crypto.myPairingCode()+"\n"+
-            "Installer fra: https://bspippi1337.github.io/blckchat/"); 
-            status("SMS-appen er åpnet med offentlig nøkkel. Trykk Send der.");
+        try{
+            String publicCode=crypto.myPairingCode();
+            String publicOnly=publicCode.substring("BC42K|1|".length());
+            String joinUrl="https://bspippi1337.github.io/blckchat/join.html#k="+publicOnly;
+            String sms="BLCKCHAT 42: Du er invitert til kryptert SMS-test. "+
+                "1) Åpne lenken og installer appen. "+
+                "2) Åpne samme lenke igjen og trykk Åpne BLCKCHAT. "+
+                "Offentlig nøkkel legges inn automatisk. "+
+                "Bekreft sikkerhetskoden ved å ringe hverandre. "+joinUrl;
+            composeSms(sms);
+            status("SMS-appen er åpnet med invitasjonslenke. Trykk Send der.");
         }catch(Exception ex){showFailure(ex);}
     }
     private void importKey(){
@@ -295,7 +302,20 @@ public final class RemoteSmsActivity extends Activity {
             }).show();
     }
     private void receiveIntent(Intent intent){
-        if(intent==null || !Intent.ACTION_SEND.equals(intent.getAction()) ||
+        if(intent==null)return;
+        if(Intent.ACTION_VIEW.equals(intent.getAction())){
+            Uri link=intent.getData();
+            if(link!=null && "blckchat".equals(link.getScheme()) &&
+                "pair".equals(link.getHost())){
+                String key=link.getQueryParameter("k");
+                if(key!=null && key.matches("[A-Za-z0-9_-]{100,160}")){
+                    peerCode.setText("BC42K|1|"+key);
+                    status("Nøkkelen fra invitasjonen er fylt inn. Trykk IMPORTER OFFENTLIG NØKKEL.");
+                }
+            }
+            return;
+        }
+        if(!Intent.ACTION_SEND.equals(intent.getAction()) ||
             !("text/plain".equals(intent.getType())))return;
         CharSequence shared=intent.getCharSequenceExtra(Intent.EXTRA_TEXT);
         if(shared==null)return;
