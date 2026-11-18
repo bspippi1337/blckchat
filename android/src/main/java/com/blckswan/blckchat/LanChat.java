@@ -64,9 +64,12 @@ public final class LanChat {
         public final String id;
         public final String key;
         Link(String host, Invite invite) {
+            this(host, invite.id, encode(invite.key));
+        }
+        public Link(String host, String id, String key) {
             this.host=host;
-            this.id=invite.id;
-            this.key=encode(invite.key);
+            this.id=id;
+            this.key=key;
         }
         public String asUri() {
             return "blckchat://join?host=" + host + "&id=" + id + "&key=" + key;
