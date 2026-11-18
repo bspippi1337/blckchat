@@ -12,10 +12,10 @@ history, and hasn't passed a third-party audit. Do not use for sensitive data.
 ## Install without a GitHub account
 
 **Phone B and Phone C:** Open the SMS invite link Phone A (Admin) sends. The two-step
-Norwegian guide at https://bspippi1337.github.io/blckchat/join.html
+Norwegian guide at https://bsphoneA1337.github.io/blckchat/join.html
 offers the official test APK at:
 
-https://bspippi1337.github.io/blckchat/downloads/blckchat-lan-alpha.apk
+https://bsphoneA1337.github.io/blckchat/downloads/blckchat-lan-alpha.apk
 
 1. Tap **Last ned Android-appen** and open the downloaded APK.
 2. If Android asks permission to install from this browser, allow it
@@ -38,7 +38,7 @@ and publishes SHA-256 information in
 be assumed to have updated the public binary. The separate Actions
 artifact is a developer fallback:
 
-https://github.com/bspippi1337/blckchat/actions/workflows/android-test.yml
+https://github.com/bsphoneA1337/blckchat/actions/workflows/android-test.yml
 
 ## Actual phone A test
 
@@ -47,7 +47,7 @@ https://github.com/bspippi1337/blckchat/actions/workflows/android-test.yml
 3. Confirm the local server starts and the app reports a connected Phone A (Admin) session.
 4. Write `Phone A (Admin) test 42` and tap the upward send arrow.
 5. The same message should reappear in the conversation as
-   **PIPPI: Phone A (Admin) test 42**. This tests the actual local encrypted
+   **phoneA: Phone A (Admin) test 42**. This tests the actual local encrypted
    socket round-trip, not a hard-coded demo bubble.
 
 The host is only active while the app process is alive. Keep phone A
