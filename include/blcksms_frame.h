@@ -37,7 +37,7 @@ typedef struct {
  * in 32 lowercase hexadecimal characters. Returns number of frames.
  */
 int blcksms_frame_pack(const uint8_t *sealed, size_t sealed_len,
-                       const char id[BLCKSMS_ID_TEXT],
+                       const char *id,
                        char out[][BLCKSMS_FRAME_TEXT],
                        size_t available, size_t *frame_count);
 void blcksms_frame_reset(blcksms_frame_collector *collector);
