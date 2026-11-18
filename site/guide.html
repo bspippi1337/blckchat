@@ -13,17 +13,18 @@
 <p class="notice"><strong>Før dere starter:</strong> Dette er en eksperimentell, ennå ikke sikkerhetsrevidert krypteringsløsning. Ikke bruk den til sensitive meldinger. Telefonnumre og tidspunkt skjules ikke for mobiloperatøren. Telefonenes offentlige nøkler må verifiseres ved å sammenligne sikkerhetskoden via en uavhengig telefonsamtale.</p>
 <h2>1. Begge installerer appen</h2>
 <p>Åpne <a href="join.html">nedlastingssiden</a> på hver Android-telefon, trykk «Last ned BLCKCHAT SMS-test» og installer. Godta bare nødvendig installasjonstillatelse for denne offisielle lenken. Ikke slå av Play Protect. Start BLCKCHAT.</p>
-<h2>2. Phone A sender sin offentlige nøkkel</h2>
-<p>Skriv mobilnummeret til Phone B med landskode (for eksempel <code>+47…</code>). Trykk «SEND MIN OFFENTLIGE NØKKEL VIA SMS». Den vanlige SMS-appen åpnes med en <code>BC42K|1|…</code>-kode. Se over og trykk Send.</p>
-<h2>3. Phone B svarer med sin nøkkel</h2>
-<p>Phone B kopierer hele <code>BC42K|1|…</code>-koden fra SMS-en, limer den inn i feltet for mottakerens nøkkel og trykker «IMPORTER OFFENTLIG NØKKEL». Deretter sender Phone B sin egen offentlige nøkkel fra samme knapp tilbake til Phone A. Phone A importerer koden på samme måte.</p>
-<p>Hvis SMS-appen kan dele tekst, kan dere også bruke «Del» → BLCKCHAT. Appen fyller inn nøkkelkoden for kontroll. Den importeres ikke automatisk.</p>
+<h2>2. Phone A sender invitasjon</h2>
+<p>Skriv mobilnummeret til Phone B med landskode (for eksempel <code>+47…</code>). Trykk «SEND MIN OFFENTLIGE NØKKEL VIA SMS». SMS-appen åpnes med en invitasjonslenke. Trykk Send.</p>
+<h2>3. Phone B åpner den samme lenken igjen</h2>
+<p>Phone B installerer først appen via lenken i SMS-en. Deretter åpner Phone B den <strong>samme SMS-lenken på nytt</strong>, trykker «Åpne BLCKCHAT med invitasjonen», og ser offentlig nøkkel ferdig utfylt i appen. Trykk «IMPORTER OFFENTLIG NØKKEL» for å godta nøkkelen som <em>uverifisert</em>.</p>
+<p>Phone B sender deretter sin egen SMS-invitasjonslenke tilbake til Phone A, som åpner den på samme måte. På dette tidspunktet må begge sammenligne sikkerhetskoden før kryptert meldingsutveksling aktiveres.</p>
+<p>Hvis en lenke ikke åpner appen, kan man i stedet kopiere <code>BC42K|1|…</code>-koden fra tekstfeltet og lime den inn manuelt. En nøkkel som er hentet fra SMS er ikke automatisk identitetsverifisert.</p>
 <h2>4. Bekreft sikkerhetskoden</h2>
 <p>Begge telefonene viser nå en sikkerhetskode. Ring hverandre via en kanal dere stoler på og sammenlign koden tegn for tegn. <strong>Hvis de ikke er identiske, stopp.</strong> Ikke kryss av for bekreftelse før de faktisk stemmer. Trykk deretter «Jeg har sammenlignet og bekreftet koden» på begge telefonene.</p>
 <h2>5. Send og les første krypterte melding</h2>
 <p>Phone A skriver for eksempel «Testmelding 42». Trykk «SEND KRYPTERT SMS». Appen viser en bekreftelse om eventuelle SMS-deler og åpner den vanlige SMS-appen med <em>kryptert</em> tekst. Trykk Send der.</p>
 <p>Phone B åpner meldingen i sin SMS-app, kopierer hele teksten som begynner med <code>BC42|1|…</code>, limer den inn i BLCKCHAT og trykker «DEKRYPTER MOTTATT MELDING». Hvis den er komplett og autentisk, vises meldingen. Gjenta andre veien.</p>
-<h2>Om noe ikke virker</h2>
+<h2>Om noe ikke virker</h2><p><strong>Android nekter å oppdatere APK-en:</strong> Tidlige testbygg kan være signert med ulike utviklernøkler. Avinstaller den forrige testappen før du installerer den nye. Da må nøkkelparing og sikkerhetskontroll gjøres på nytt.</p>
 <p><strong>«Kunne ikke starte kryptering»:</strong> Android 12 eller nyere og en fungerende Android Keystore ECDH-leverandør er nødvendig. Det finnes ingen usikker fallback.</p>
 <p><strong>«En annen mottaker er allerede paret»:</strong> Bare én verifisert kontakt støttes i denne første testen. Bruk «FJERN PARING» hvis du bevisst vil bytte kontakt. Det krever ny sikkerhetskontroll.</p>
 <p><strong>«Meldingen er ufullstendig eller skadet»:</strong> Kopier hele den krypterte SMS-en. Lange meldinger kan bestå av flere deler. Operatøren kan ta betalt for mer enn én SMS.</p>
