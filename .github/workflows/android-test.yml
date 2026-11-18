@@ -36,6 +36,18 @@ jobs:
           "$SDKMANAGER" --sdk_root="${ANDROID_HOME:-/usr/local/lib/android/sdk}" --install "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.2.12479018"
       - name: Assemble remote SMS experimental APK
         run: gradle --no-daemon --stacktrace :android:assembleDebug
+      - name: Enforce zero-permission SMS alpha and correct launcher
+        run: |
+          set -euo pipefail
+          APK="android/build/outputs/apk/debug/android-debug.apk"
+          AAPT="${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools/35.0.0/aapt"
+          test -x "$AAPT"
+          "$AAPT" dump permissions "$APK" > /tmp/blckchat-permissions.txt
+          if grep -E 'android.permission.(INTERNET|SEND_SMS|READ_SMS|RECEIVE_SMS)' /tmp/blckchat-permissions.txt; then
+            echo "SMS build unexpectedly requests a privileged/network permission" >&2
+            exit 1
+          fi
+          "$AAPT" dump badging "$APK" | grep -F "com.blckswan.blckchat.RemoteSmsActivity"
       - name: Save installable experimental APK
         uses: actions/upload-artifact@v4
         with:
