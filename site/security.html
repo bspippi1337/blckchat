@@ -11,6 +11,9 @@
 <p>Brukere må sammenligne sikkerhetskoden selv. En SMS-lenke eller et telefonnummer er <strong>ikke</strong> tilstrekkelig identitetsbevis. Ingen får «verifisert»-status automatisk.</p>
 <h2>Hva kan testappen få tilgang til?</h2>
 <p>Den nye SMS-utgaven ber ikke om <code>INTERNET</code>, <code>SEND_SMS</code>, <code>READ_SMS</code> eller <code>RECEIVE_SMS</code>. SMS sendes fra den vanlige meldingsappen etter ditt valg. Mottatte krypterte SMS-er kopieres eller deles uttrykkelig inn i BLCKCHAT. Nettleser- og SMS-appene bruker sine egne systemrettigheter.</p>
+<h2>Beskyttelse av utkast og lokal samtalehistorikk</h2>
+<p>Uferdige krypterte SMS-utkast knyttes kryptografisk til mottakernummer og verifisert nøkkelidentitet ved hjelp av en separat Android Keystore-HMAC-nøkkel. Appen avviser forsøk på å gjenbruke utkastet med feil nummer eller en annen kontakt. Telefonnummeret lagres ikke i utkastdatabasen.</p>
+<p>Valgfri lokal samtalehistorikk lagres kryptert med AES-GCM og en egen ikke-eksporterbar Keystore-nøkkel. SQLite får ikke klartekst, men meldinger kan fremdeles leses av noen med tilgang til en ulåst eller kompromittert telefon. Historikken er begrenset til 300 poster og kan slettes.</p>
 <h2>Offentlig nettsted, privat kryptografi</h2>
 <p>GitHub Pages inneholder bare dokumentasjon, APK-distribusjon og offentlige nøkkellenker. Ingen privat nøkkel eller chatinnhold skal legges på nettstedet. URL-fragmentet i en invitasjon inneholder bare en offentlig nøkkel, og blir ikke sendt til webserveren som del av HTTP-adressen.</p>
 <h2>Neste sikkerhetsmilepæl</h2>
