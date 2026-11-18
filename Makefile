@@ -8,7 +8,7 @@ CRYPTO_LIBS = -lcrypto
 endif
 
 .PHONY: all test clean preview
-all: blckchat blckchat-gui-preview blckchat-sms-test blckchat-authz-test blckchat-room-test
+all: blckchat blckchat-gui-preview blckchat-sms-test blckchat-authz-test blckchat-room-test blckchat-security-test
 
 blckchat: src/main.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $<
@@ -25,6 +25,9 @@ blckchat-authz-test: tests/authz.c src/blckauthz.c include/blckauthz.h
 blckchat-room-test: tests/room.c src/blckroom.c src/blcksecure_openssl.c src/blcksms.c include/blckroom.h include/blcksecure.h include/blcksms.h
 	$(CC) $(CPPFLAGS) $(CRYPTO_CFLAGS) $(CFLAGS) -o $@ tests/room.c src/blckroom.c src/blcksecure_openssl.c src/blcksms.c $(CRYPTO_LIBS)
 
+blckchat-security-test: tests/security_edge.c src/blckroom.c src/blcksecure_openssl.c src/blcksms.c include/blckroom.h include/blcksecure.h include/blcksms.h
+	$(CC) $(CPPFLAGS) $(CRYPTO_CFLAGS) $(CFLAGS) -o $@ tests/security_edge.c src/blckroom.c src/blcksecure_openssl.c src/blcksms.c $(CRYPTO_LIBS)
+
 preview: blckchat-gui-preview
 	./blckchat-gui-preview blckchat-preview.svg
 
@@ -33,6 +36,7 @@ test: all
 	./blckchat-sms-test
 	./blckchat-authz-test
 	./blckchat-room-test
+	./blckchat-security-test
 	./blckchat-gui-preview blckchat-preview.svg
 	grep -q 'BLCK / CHAT' blckchat-preview.svg
 
