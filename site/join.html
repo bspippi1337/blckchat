@@ -3,69 +3,53 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090e15">
-<meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow">
-<meta name="description" content="BLCKCHAT 42. Enkel installasjon og invitasjon for Phone B og Phone C.">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="BLCKCHAT 42: kryptert SMS-test over avstand, uten felles Wi-Fi.">
+<title>Installer SMS-testen · BLCKCHAT 42</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
-<title>Du er invitert · BLCKCHAT 42</title>
 </head>
 <body>
-<a class="skip" href="#main">Hopp til veiledningen</a>
-<header class="nav shell"><a class="identity" href="./"><img src="icon.svg" width="34" height="34" alt=""><span>BLCK/CHAT <sup>42</sup></span></a>
-<nav aria-label="Meny"><a href="./">Hjem</a><a href="guide.html">Hjelp</a><a href="security.html">Sikkerhet</a></nav></header>
+<a class="skip" href="#main">Hopp til innholdet</a>
+<header class="nav shell"><a href="./" class="identity">
+<img src="icon.svg" width="34" height="34" alt="">BLCK/CHAT <sup>42</sup></a>
+<nav aria-label="Meny"><a href="./">Hjem</a><a href="guide.html">Bruksanvisning</a><a href="security.html">Sikkerhet</a></nav></header>
 <main id="main" class="doc shell">
-<p class="kicker">VELKOMMEN TIL TESTEN</p><div class="status" role="status" style="border-left-color:#e5ad67;background:#292419;color:#ffe6b9"><strong>Viktig oppdatering:</strong> Denne APK-en støtter foreløpig bare lokal Wi-Fi-test. Den fungerer <strong>ikke</strong> som fjernchat mellom telefoner på ulike nett. Kryptert SMS-chat og senere mobilnett er under utvikling. Ikke bruk denne installasjonssiden som en ferdig invitasjon til fjern-test.</div>
-<h1>Hei! Phone A (Admin) har invitert deg.</h1>
-<p class="lede" style="max-width:650px">Denne siden gjelder en eldre, intern LAN-test. Den kommende fjern-chatten skal fungere med SMS først og deretter mobildata, uten at deltakerne trenger GitHub eller BankID.</p>
-<div class="status" role="status">Kun for lokal Wi-Fi-testing på samme nett. Ingen ende-til-ende-kryptering eller fjern-chat i denne utgaven.</div>
+<p class="kicker">SMS FIRST / ANDROID TEST</p>
+<h1>Du er invitert til å teste BLCKCHAT.</h1>
+<p class="lede">Dere trenger ikke være på samme Wi-Fi. Appen bruker vanlige SMS-er, men krypterer meldingsinnholdet på telefonen før sending.</p>
+<div class="status" role="status"><strong>Eksperimentell prøveversjon.</strong>
+Dette er ikke en sikkerhetsrevidert messenger. Begge telefonene trenger Android 12 eller nyere. Ikke bruk appen til sensitive samtaler ennå. SMS-operatøren ser telefonnumre og tidspunkt, men ikke innholdet i en korrekt kryptert melding.</div>
+
 <div class="steps portal-steps">
 <section class="portal-step">
 <span class="num">STEG 01 / INSTALLER</span>
-<h2>Last ned lokal test-APK</h2>
-<p>Trykk knappen under på Android-telefonen. Den laster ned den samme testappen som Phone A (Admin) bruker.</p>
-<a class="button primary download-cta" href="downloads/blckchat-lan-alpha.apk" download="blckchat-lan-alpha.apk"><span aria-hidden="true">↓</span> Last ned Android-appen</a>
-<p class="helper"><strong>Når telefonen spør:</strong> Velg «Last ned» og deretter «Installer». Fordi dette er en intern test, kan Android be deg tillate installasjon fra nettleseren. Velg det bare for denne offisielle lenken.</p>
-<p class="helper">Hvis telefonen viser en konkret sikkerhetsadvarsel om skadelig programvare, ikke overstyr den. Gi beskjed til Phone A (Admin).</p>
+<h2>Last ned appen</h2>
+<p>Trykk på knappen på Android-telefonen. Den laster ned vår egen test-APK direkte fra BLCKCHATs GitHub Pages.</p>
+<a class="button primary download-cta" href="downloads/blckchat-sms-experimental.apk" download="blckchat-sms-experimental.apk"><span aria-hidden="true">↓</span> Last ned BLCKCHAT SMS-test</a>
+<p class="helper">Åpne den nedlastede APK-filen og trykk «Installer». Android kan spørre om tillatelse til installasjon fra nettleseren. Den kan gis for denne ene installasjonen og slås av igjen etterpå.</p>
+<p class="helper"><strong>Viktig:</strong> Ikke slå av Play Protect. Hvis telefonen viser en spesifikk advarsel om skadevare, stopp installasjonen.</p>
 </section>
 <section class="portal-step">
-<span class="num">STEG 02 / BLI MED</span>
-<h2>Åpne SMS-lenken igjen</h2>
-<p>Når appen er installert, går du tilbake til SMS-en fra Phone A (Admin) og trykker den <strong>samme lenken en gang til</strong>.</p>
-<div id="lan-ready" hidden>
-<p class="status">Invitasjonen er funnet. Når appen er installert, kan du også åpne den direkte med knappen her:</p>
-<a id="lan-open-app" class="button primary download-cta" href="#">Åpne BLCKCHAT og bli med <span aria-hidden="true">↗</span></a>
-</div>
-<p>Velg navnet ditt, for eksempel <strong>Phone B</strong> eller <strong>Phone C</strong>, og trykk «JOIN THIS ROOM». Du trenger ikke skrive inn kanal, IP-adresse eller noen nøkkel.</p>
-<p class="helper">Phone A (Admin) må ha appen åpen. Begge telefonene må være koblet til samme Wi-Fi eller Pippis hotspot.</p>
+<span class="num">STEG 02 / KOBLE SAMMEN</span>
+<h2>Utveksle nøkler</h2>
+<p>Åpne BLCKCHAT. Phone A (Admin) og Phone B sender hver sin <strong>offentlige nøkkelkode</strong> via SMS. Kopier koden fra den vanlige SMS-appen og lim den inn i BLCKCHAT.</p>
+<p>Begge telefonene viser deretter en <strong>sikkerhetskode</strong>. Sammenlign den muntlig over en telefonsamtale dere stoler på. Kodene må være identiske før dere bekrefter og sender meldinger.</p>
+<p class="helper">Dette oppsettet har ingen GitHub-konto, ingen serveradresse og intet Wi-Fi-krav. Selve nøkkelutvekslingen kan kreve et par SMS-er.</p>
 </section>
 </div>
 <section class="portal-help">
-<h2>Om noe ikke virker</h2>
-<details><summary>Telefonen spør om tillatelse til installasjon</summary><p>En testapp utenfor Play Butikk kan utløse «Installer ukjente apper». På Android kan du gi nettleseren tillatelse for akkurat denne installasjonen, og slå den av igjen etterpå. Ikke slå av Play Protect.</p></details>
-<details><summary>Appen åpner seg, men du kommer ikke inn</summary><p>Sjekk at dere bruker samme Wi-Fi og at Phone A (Admin) holder rommet åpent. Be Phone A (Admin) sende en ny SMS-invitasjon dersom den gamle er brukt eller over 10 minutter gammel.</p></details>
-<details><summary>Trenger jeg GitHub eller Google-innlogging?</summary><p>Nei. I denne testutgaven velger du bare et visningsnavn.</p></details>
-<details><summary>Kan jeg sende private eller sensitive meldinger?</summary><p>Ikke ennå. Dette er en intern LAN-test. Meldinger er beskyttet under overføring, men den er ikke ferdig ende-til-ende-kryptert eller sikkerhetsrevidert.</p></details>
-<details><summary>Hva med iPhone?</summary><p>Denne APK-filen er bare for Android. iPhone-utgaven er under utvikling.</p></details>
+<h2>Deretter: send og les meldinger</h2>
+<p>Trykk «Send kryptert SMS», kontroller innhold og pris i telefonens vanlige SMS-app og trykk Send. Mottakeren kopierer den krypterte SMS-teksten inn i BLCKCHAT og trykker «Dekrypter». SMS-appen kan også tilby «Del» som sender teksten direkte til BLCKCHAT.</p>
+<p><a class="button secondary" href="guide.html">Les den enkle steg-for-steg-guiden</a></p>
+<h2>Vanlige spørsmål</h2>
+<details><summary>Må jeg ha GitHub-konto eller BankID?</summary><p>Nei. Ingen av delene trengs for SMS-testen.</p></details>
+<details><summary>Er dette ende-til-ende-kryptert?</summary><p>Testutgaven har direkte nøkkelutveksling mellom to Android-enheter og AES-GCM-kryptering av meldinger. Kontaktens identitet er ikke trygg før begge har sammenlignet sikkerhetskoden. Løsningen mangler ratchet/forward secrecy og uavhengig sikkerhetsrevisjon, og må ikke forveksles med en moden sikker messenger.</p></details>
+<details><summary>Hvorfor må jeg kopiere SMS-tekst?</summary><p>Vi ønsker ikke å kreve generell SMS-lesetilgang i testutgaven. Derfor skjer mottak foreløpig ved kopiering eller Androids Del-funksjon.</p></details>
+<details><summary>Hvorfor kreves Android 12?</summary><p>Første test bruker ECDH-nøkler i Android Keystore, støttet fra Android 12. Eldre enheter får en tydelig feilmelding og får ikke usikker fallback.</p></details>
+<details><summary>Kan iPhone bruke APK-en?</summary><p>Nei. Denne filen er kun for Android. iOS-versjonen gjenstår.</p></details>
 </section>
-<p class="fine">Utviklingstest · Åpen kildekode · <a href="https://github.com/bspippi1337/blckchat">Se kildekoden</a> · <a href="downloads/SHA256SUMS.txt">SHA-256-kontrollsum</a></p>
-</main>
-<script>
-(function () {
-  "use strict";
-  const hash=window.location.hash;
-  if (!hash.startsWith("#lan=")) return;
-  try {window.history.replaceState(null,"",window.location.pathname+window.location.search);}catch(_){}
-  const parts=hash.slice(5).split("~");
-  if (parts.length!==3) return;
-  const [host,id,key]=parts;
-  if(!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(host) ||
-     !/^[A-Za-z0-9_-]{16,64}$/.test(id) ||
-     !/^[A-Za-z0-9_-]{40,64}$/.test(key)) return;
-  if (host.split(".").some(n=>Number(n)>255)) return;
-  const url="blckchat://join?host="+encodeURIComponent(host)+
-    "&id="+encodeURIComponent(id)+"&key="+encodeURIComponent(key);
-  document.getElementById("lan-open-app").setAttribute("href",url);
-  document.getElementById("lan-ready").hidden=false;
-})();
-</script>
-</body>
-</html>
+<p class="fine">Utviklingsbygg ·
+<a href="https://github.com/bspippi1337/blckchat">Kildekode</a> ·
+<a href="downloads/SHA256SUMS.txt">SHA-256-sjekksum</a> ·
+<a href="security.html">Sikkerhetsinformasjon</a></p>
+</main></body></html>
