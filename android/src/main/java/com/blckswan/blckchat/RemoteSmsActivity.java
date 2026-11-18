@@ -210,6 +210,9 @@ public final class RemoteSmsActivity extends Activity {
         paragraph("Hvis en melding kommer som flere SMS-er: lim inn én del av gangen. "
             +"Delene lagres kryptert, uansett rekkefølge, også ved omstart. "
             +"Tips: bruk Del-funksjonen i SMS-appen. Ingen SMS-tilgang kreves.",15);
+        gap(action("KOPIER ANONYM TESTSTATUS",false,v->copyDiagnostic()),18);
+        paragraph("Testrapporten inneholder ikke telefonnummer, meldinger, "+
+            "private nøkler eller offentlige nøkkelkoder.",8);
         gap(action("BRUKSANVISNING OG KILDEKODE",false,v->{
             startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(
                 "https://bspippi1337.github.io/blckchat/")));
@@ -236,6 +239,27 @@ public final class RemoteSmsActivity extends Activity {
         },"blck-crypto-selftest");
         worker.setDaemon(true);
         worker.start();
+    }
+    private void copyDiagnostic(){
+        String version="unknown";
+        try {
+            android.content.pm.PackageInfo info=getPackageManager().getPackageInfo(
+                getPackageName(),0);
+            if(info.versionName!=null)version=info.versionName;
+        }catch(Exception ignored){}
+        String report="BLCKCHAT 42 TESTSTATUS\\n"+
+            "Versjon: "+version+"\\n"+
+            "Android API: "+android.os.Build.VERSION.SDK_INT+"\\n"+
+            "Keystore-identitet: "+(crypto!=null?"Opprettet":"Utilgjengelig")+"\\n"+
+            "Mottaker registrert: "+(crypto!=null&&crypto.hasPeer()?"Ja":"Nei")+"\\n"+
+            "Sikkerhetskode bekreftet: "+(crypto!=null&&crypto.verified()?"Ja":"Nei")+"\\n"+
+            "Uferdige krypterte meldinger: "+(inbox!=null?inbox.pendingCount():0)+"\\n"+
+            "Kjøring: eksperimentell SMS-alpha, ikke sikkerhetsrevidert";
+        android.content.ClipboardManager manager=
+            (android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+        manager.setPrimaryClip(android.content.ClipData.newPlainText(
+            "BLCKCHAT anonym teststatus",report));
+        status("Anonym teststatus kopiert. Kan sendes til utvikleren.");
     }
     private void updatePairing(){
         if(crypto==null || pairingPanel==null)return;
