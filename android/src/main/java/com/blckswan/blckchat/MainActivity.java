@@ -332,9 +332,10 @@ public final class MainActivity extends Activity implements LanChat.Events {
             latestInvite=invite.asUri();
             String page="https://bspippi1337.github.io/blckchat/join.html#lan="
                 +invite.host+"~"+invite.id+"~"+invite.key;
-            String message="BLCKCHAT: Pippi invited you. 1) Install from "+page+
-                " 2) Reopen the same link and tap Open app. Same Wi-Fi required. "
-                +"Invite expires in 10 minutes; request another if needed.";
+            String message="Hei! Pippi inviterer deg til BLCKCHAT-testen. "+
+                "1) Åpne lenken og installer appen. "+
+                "2) Åpne samme SMS-lenke igjen og trykk «Åpne BLCKCHAT». "+
+                "Bruk samme Wi-Fi. Lenken varer i 10 minutter. "+page;
             Intent sms=new Intent(Intent.ACTION_SENDTO);
             sms.setData(Uri.parse("smsto:"+Uri.encode(phone)));
             sms.putExtra("sms_body",message);
