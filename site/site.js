@@ -1,4 +1,43 @@
 "use strict";
+
+/* BLCKCHAT's living monogram, including an accessible no-motion reveal.
+ * The branded effect is decorative: controls and downloads never depend on it. */
+(() => {
+  const mark=document.querySelector(".brand-motion");
+  const replay=document.querySelector("[data-brand-replay]");
+  if(!mark || !replay)return;
+  const reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
+  const setLabel=()=>{
+    const staticHat=mark.classList.contains("bm-static-blackhat");
+    replay.lastChild.textContent=reduced.matches
+      ?(staticHat?" SHOW BLCK/CHAT":" SHOW BLACK HAT")
+      :" REPLAY THE TRANSFORMATION";
+    replay.setAttribute("aria-label",reduced.matches
+      ?(staticHat?"Show the original BLCKCHAT logo":"Show the BLACK HAT logo without animation")
+      :"Replay the BLCKCHAT to BLACK HAT logo animation");
+  };
+  replay.addEventListener("click",()=>{
+    if(reduced.matches){
+      mark.classList.toggle("bm-static-blackhat");
+    }else{
+      mark.classList.remove("bm-static-blackhat");
+      // Restart the actual CSS animations from their first frame.
+      // Avoid repeated DOM cloning or artificial timeouts.
+      for(const animation of mark.getAnimations({subtree:true})){
+        animation.cancel();
+        animation.play();
+      }
+    }
+    setLabel();
+  });
+  if(typeof reduced.addEventListener==="function")
+    reduced.addEventListener("change",()=>{
+      mark.classList.remove("bm-static-blackhat");
+      setLabel();
+    });
+  setLabel();
+})();
+
 (async () => {
   const status = document.getElementById("release-status");
   const grid = document.getElementById("release-assets");
