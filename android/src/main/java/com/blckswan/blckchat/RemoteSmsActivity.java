@@ -40,12 +40,14 @@ public final class RemoteSmsActivity extends Activity {
     private SmsE2ee crypto;
     private SmsFrameInbox inbox;
     private SmsDraftStore drafts;
+    private SmsLocalHistory history;
     private LinearLayout body;
     private EditText phone,peerCode,outgoing,incoming;
     private TextView status,fingerprint,decrypted;
     private CheckBox verified;
     private TextView sendButton;
     private TextView outboxProgress;
+    private TextView historyView;
     private LinearLayout pairingPanel;
 
     private int dp(int value){ return (int)(value*getResources().getDisplayMetrics().density+.5f); }
@@ -116,6 +118,7 @@ public final class RemoteSmsActivity extends Activity {
             crypto=new SmsE2ee(this);
             inbox=new SmsFrameInbox(this);
             drafts=new SmsDraftStore(this);
+            history=new SmsLocalHistory(this);
         }catch(Exception ex){
             showUnsupported(ex);return;
         }
@@ -222,6 +225,17 @@ public final class RemoteSmsActivity extends Activity {
         paragraph("Hvis en melding kommer som flere SMS-er: lim inn én del av gangen. "
             +"Delene lagres kryptert, uansett rekkefølge, også ved omstart. "
             +"Tips: bruk Del-funksjonen i SMS-appen. Ingen SMS-tilgang kreves.",15);
+        gap(label("04 / KRYPTERT LOKAL SAMTALEHISTORIKK",18,FG,true),30);
+        paragraph("Inntil 300 meldingsutkast og mottatte meldinger lagres "+
+            "kryptert med en egen nøkkel i Android Keystore. Dette er "+
+            "bare lokal historikk, ikke en leveringskvittering.",12);
+        gap(action("VIS SISTE MELDINGER",false,v->showHistory()),12);
+        historyView=label("Trykk for å se lokal, kryptert historikk.",14,SUB,false);
+        historyView.setPadding(dp(14),dp(14),dp(14),dp(14));
+        historyView.setBackground(panel(PANEL,12));
+        gap(historyView,10);
+        gap(action("SLETT LOKAL SAMTALEHISTORIKK",false,v->confirmClearHistory()),8);
+
         gap(action("KOPIER ANONYM TESTSTATUS",false,v->copyDiagnostic()),18);
         paragraph("Testrapporten inneholder ikke telefonnummer, meldinger, "+
             "private nøkler eller offentlige nøkkelkoder.",8);
@@ -231,6 +245,57 @@ public final class RemoteSmsActivity extends Activity {
         }),20);
         updatePairing();
     }
+    private void showHistory(){
+        if(crypto==null || !crypto.verified()){
+            historyView.setText("Bekreft først sikkerhetskoden med mottakeren.");
+            return;
+        }
+        historyView.setText("Dekrypterer lokal historikk…");
+        new Thread(()->{
+            try{
+                java.util.List<SmsLocalHistory.Entry> entries=
+                    history.latest(crypto.verifiedPeerHash(),12);
+                StringBuilder output=new StringBuilder();
+                if(entries.isEmpty()){
+                    output.append("Ingen lokalt lagrede meldinger ennå.");
+                }else {
+                    java.text.SimpleDateFormat clock=
+                        new java.text.SimpleDateFormat("dd.MM HH:mm",
+                            java.util.Locale.ROOT);
+                    for(SmsLocalHistory.Entry entry:entries){
+                        if(output.length()>0)output.append("\n\n");
+                        output.append(clock.format(new java.util.Date(entry.timestamp)))
+                            .append(" · ").append(entry.direction).append("\n")
+                            .append(entry.text);
+                    }
+                }
+                String display=output.toString();
+                runOnUiThread(()->historyView.setText(display));
+            }catch(Exception e){
+                runOnUiThread(()->{
+                    historyView.setText("Den lokale historikken kunne ikke dekrypteres.");
+                    status("Historikkfeil. Den eksisterende SMS-krypteringen er uendret.");
+                });
+            }
+        },"blck-history-reader").start();
+    }
+
+    private void confirmClearHistory(){
+        new AlertDialog.Builder(this)
+            .setTitle("Slette samtalehistorikken?")
+            .setMessage("Lokal historikk slettes permanent. "+
+                "Krypteringsnøkler, SMS-er i vanlig SMS-app og "+
+                "uavklarte krypterte utkast beholdes.")
+            .setNegativeButton("Behold",null)
+            .setPositiveButton("Slett historikk",(dialog,which)->{
+                try{
+                    history.clear();
+                    historyView.setText("Lokal samtalehistorikk er slettet.");
+                    status("Krypterte historikkposter slettet.");
+                }catch(Exception ex){showFailure(ex);}
+            }).show();
+    }
+
     private void selfTest(){
         status("Tester Android Keystore, nøkkelutveksling og AES-GCM lokalt…");
         Thread worker=new Thread(()->{
@@ -341,7 +406,13 @@ public final class RemoteSmsActivity extends Activity {
                     "Først må du fullføre eller forkaste tidligere kryptert SMS.");
             String plain=outgoing.getText().toString().trim();
             String wire=crypto.encrypt(plain);
-            drafts.remember(wire,phone(),crypto.verifiedPeerHash());
+            String peerHash=crypto.verifiedPeerHash();
+            drafts.remember(wire,phone(),peerHash);
+            try{
+                history.add("UTKAST",peerHash,wire.substring(7,39),plain);
+            }catch(Exception journalError){
+                status("SMS-utkastet er sikret, men lokal historikk kunne ikke lagres.");
+            }
             outgoing.setText("");
             updateOutboxProgress();
             showCurrentPart();
@@ -464,6 +535,11 @@ public final class RemoteSmsActivity extends Activity {
             // Completion of SMS fragments is not proof of authenticity.
             String plain=crypto.decrypt(receipt.completeWire);
             inbox.acknowledged(receipt.id);
+            try{
+                history.add("MOTTATT",crypto.verifiedPeerHash(),receipt.id,plain);
+            }catch(Exception journalError){
+                status("Meldingen er dekryptert, men historikken kunne ikke lagres.");
+            }
             decrypted.setText("MOTTATT OG AUTENTISERT\n"+plain);
             decrypted.setTextColor(FG);
             status("Alle SMS-deler mottatt. Integritet og duplikatsjekk bestått.");
@@ -487,7 +563,8 @@ public final class RemoteSmsActivity extends Activity {
                 +"og sammenligne sikkerhetskoden på nytt. Lokal egen nøkkel beholdes.")
             .setNegativeButton("Avbryt",null)
             .setPositiveButton("Fjern paring",(d,w)->{
-                try{crypto.forgetPeer();inbox.clear();drafts.clear();updateOutboxProgress();peerCode.setText("");
+                try{crypto.forgetPeer();inbox.clear();drafts.clear();history.clear();updateOutboxProgress();peerCode.setText("");
+                    if(historyView!=null)historyView.setText("Samtalehistorikk slettet.");
                     decrypted.setText("Ingen melding dekryptert.");
                     updatePairing();status("Paring fjernet.");
                 }catch(Exception e){showFailure(e);}
