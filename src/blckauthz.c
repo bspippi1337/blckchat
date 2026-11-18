@@ -6,7 +6,7 @@ static int valid_name(const char *s) {
     while (n<=BLCKAUTHZ_NAME_MAX && s[n]!='\0') ++n;
     return n>0 && n<=BLCKAUTHZ_NAME_MAX;
 }
-int blck_authorized(const blck_session *s, const char *room,
+int blck_authorized(const blck_authz_session *s, const char *room,
                     blck_action action, uint64_t now) {
     if (!s || !valid_name(room) || !valid_name(s->room) ||
         !valid_name(s->subject) || !s->verified || s->revoked ||
