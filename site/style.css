@@ -36,3 +36,19 @@
   .bm-a{animation:none!important;opacity:1!important}
   .bm-flying-a{animation:none!important;display:none!important}
 }
+
+/* Calm, novice-first two-step onboarding. */
+.portal-steps{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;margin:34px 0 32px}
+.portal-steps .portal-step{padding:29px;min-height:375px}
+.portal-step h2{font-size:29px;margin:19px 0 15px}
+.portal-step p{font-size:14px;color:#bbcad0;line-height:1.75}
+.portal-step .download-cta{display:flex;justify-content:center;margin:26px 0 18px;font-size:15px;text-align:center}
+.portal-step .helper{font-size:12px;color:#91aab3;line-height:1.8}
+.portal-help{margin:24px 0 37px}
+.portal-help h2{margin-bottom:25px}
+.portal-help details{border-bottom:1px solid #31434d;padding:17px 1px}
+.portal-help summary{color:#e9f2f3;cursor:pointer;font-weight:650;list-style-position:outside}
+.portal-help details p{font-size:13px;color:#a3b9c1;line-height:1.8;margin:12px 0 0}
+.portal-help summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.portal-step #lan-ready .status{margin-top:21px;line-height:1.6}
+@media(max-width:750px){.portal-steps{grid-template-columns:1fr}.portal-steps .portal-step{min-height:auto}}
