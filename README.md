@@ -1,39 +1,67 @@
 # BLCKCHAT 42
 
-Minimal C11 chat engine. Inspired by RESTMORE/RESTLESS, designed for a GitHub-backed multi-user transport.
+A minimal GitHub-backed group messenger, written primarily in ISO C11.
 
-**Status:** Alpha 0.1 foundation. Local append-only messaging works; GitHub login, transport, invites and encryption are **not implemented yet**. This is **not** a secure messenger.
+## Product model
 
-## Build
+**Only the room administrator needs GitHub.** The administrator owns a *private* GitHub conversation repository. Guests do **not** need GitHub accounts. An administrator invites them by SMS using a short-lived, single-use URL token. Guests exchange that token for a scoped session over HTTPS, then chat in the same room.
+
+**A gateway is necessary.** GitHub cannot safely accept anonymous guest messages directly to a private repository. A small C11 gateway authenticates guest sessions, stores the administrator's GitHub credential outside the repository, validates permissions and acts as the only GitHub API writer/reader. GitHub Actions and Pages are *not* a substitute for an always-available private gateway.
+
+## State
+
+**Alpha 0.1: foundation only.** Local CLI journal, build and tests. No working GitHub gateway, SMS sending, invites, guest sessions or encryption yet. Do not use it for sensitive conversations. GitHub transport is eventual-consistency, not real-time.
+
+## Build and local smoke test
 
 ```sh
-make
-make test
+make && make test
 ./blckchat init demo
-./blckchat send demo alice "hello world"
+./blckchat send demo alice "hello"
 ./blckchat read demo
 ```
 
-Requires a C11 compiler and Make. No third-party headers or libraries in the local engine.
+The local journal is **plain text encoded as hexadecimal**, not encrypted. It uses no third-party headers. This format and CLI are prototypes, not the production protocol.
 
-## Design
+## Architecture
 
-- Small C11 protocol and storage layer with explicit error codes.
-- One message per line, fields encoded as hex to prevent delimiter and newline injection.
-- Local append-only journal with independent message records. No clock-based ordering guarantees.
-- Future GitHub adapter will use **private conversation repositories**, device OAuth, authenticated commits and conditional synchronization.
-- Invitations and participant removal must enforce GitHub collaborator permissions and rotate encryption keys when E2EE arrives.
-- GitHub is not a real-time messaging service; transport will respect API rate limits and backoff.
-- Never store access tokens or private keys in the repository.
-- A public source-code repository is fine; a public **conversation repository** is not.
+- `libbs_core`: buffers, parsers, error handling, logging.
+- `libbs_chat`: local store, room/message models, stable message IDs, validation.
+- `libbs_net`: HTTP client and HTTPS gateway interfaces with a small, audited TLS provider.
+- `libbs_gh`: GitHub REST transport, conditional GETs, rate limiting, backoff.
+- `libbs_invite`: single-use, short-lived invite credentials, guest enrollment.
+- `libbs_auth`: scoped sessions, expiration, revocation, abuse controls.
+- `libbs_ui`: minimal native chat client.
 
-## Roadmap
+**No home-grown crypto primitives for security.** Cryptographically secure randomness, keyed hashes, authenticated encryption and TLS must use reviewed platform or external cryptographic implementations. Core/application logic stays in C11 with small explicit adapter headers. The planned protocol does *not* promise E2EE until group key lifecycle and device verification have been reviewed and tested.
 
-1. Local C11 storage and deterministic tests (this commit).
-2. Platform TLS/HTTP adapter, GitHub OAuth Device Flow and secure local token storage.
-3. Chat repository provisioning, message upload/fetch, idempotent sync and retries.
-4. Multi-party invitations and access management.
-5. Audited crypto dependency, key verification, forward secrecy and group rekeying.
-6. Native UI packages for Windows, Linux and Android.
+## SMS invitation flow
 
-License: MIT (see LICENSE).
+1. Admin signs into GitHub and creates a private room via the gateway.
+2. Admin enters guest phone number and chooses invite TTL, default **10 minutes**.
+3. Gateway produces a **CSPRNG-generated opaque 256-bit token**. The token is never committed to GitHub. The gateway stores only a keyed digest and metadata (room, expiry, single-use, invite creator).
+4. SMS provider sends `https://chat.example/join#token=...` or an equivalent secure deep link. The fragment is handled client-side, never included in an HTTP referrer/request URL automatically.
+5. Guest opens link, submits token to gateway over HTTPS, and receives a limited session. Redeeming the token atomically marks it used.
+6. Guest selects a display name and can join the same chat room. Admin can kick/revoke guest sessions.
+
+The gateway requires private, protected credential/session storage and a durable atomic invite-redemption store. Prefer short-lived cookies with Secure, HttpOnly and SameSite where a browser frontend is used. Never log invite tokens or pass them into analytics. SMS messages may be forwarded, intercepted or SIM-swapped, so the token proves **possession**, not verified identity. Admin should be able to require approval after redemption. Use fixed maximum token lifetimes, rate limits and per-number SMS throttles.
+
+## GitHub transport contract
+
+- Private repository per room; append-only entries with unique IDs to avoid last-write-wins overwrite.
+- Gateway serializes or retries GitHub writes on SHA conflicts, and sync uses ETag/conditional requests.
+- Rate limit budget/backoff, no credential exposure to guests.
+- The GitHub repository is archival transport; gateway has to keep ephemeral sessions, invites, and delivery queues outside GitHub.
+- Guest messages are not visible until gateway writes and the clients resync; no instant delivery guarantee.
+- Admin token uses least available permissions and must be revocable.
+
+## Next milestones
+
+- C11 local core and reproducible tests.
+- C11 HTTPS gateway plus durable session/invite store, external TLS/crypto adapters.
+- GitHub login and private room management.
+- SMS integration, single-use invite redemption and guest UI.
+- Reliable GitHub write queue, deduplication and synchronization.
+- Group confidentiality, device/key verification, revocation and third-party security review.
+
+MIT licensed.
