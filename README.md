@@ -25,19 +25,27 @@ A minimal GitHub-backed group messenger, written primarily in ISO C11.
 
 The first SMS link carries only the administrator's **public** key in a URL fragment. The recipient installs the app, reopens the SMS link, then imports the prefilled public key and sends back their own public key. Both devices MUST compare a security code independently before activating encryption. Android's standard SMS app sends ciphertext, and recipients manually paste/share the encrypted SMS to BLCKCHAT for decryption. The C11 SMS frame layer handles packet framing.
 
+**Current transport improvements:** an encrypted, resumable outbox opens
+exactly one carrier SMS segment at a time; the user must confirm sending
+each segment manually before the next is prepared. Inbound ciphertext
+segments are reassembled in any order with a bounded persistent cache.
+Authenticated replay IDs are stored in SQLite across restarts, and a
+change in Android Keystore identity invalidates old peer verification.
+A local Keystore self-test and anonymized diagnostics are available.
+These improvements are exercised by JVM and Android-emulator tests, but
+do not establish operator-to-operator delivery or full forward secrecy.
+
 **Not audited; NOT equivalent to Signal.** This experimental static ECDH scheme has no Double Ratchet, forward secrecy against long-term key compromise, group E2EE, background SMS reading, durable chat history or cloud data transport. Phone C and mobile-data delivery are later work. Do not use this test for sensitive communications. The older LAN APK is archived development history only.
 
 [Remote cryptographic engineering plan](docs/REMOTE_SMS_E2EE.md) · [Security](SECURITY.md)
 
-## Android LAN Alpha: real test messages
+## Historical LAN proof-of-concept (superseded)
 
-**Download for Phone A (Admin), Phone B and Phone C:** [Simple Android installation page](https://bspippi1337.github.io/blckchat/join.html). The [direct test APK](https://bspippi1337.github.io/blckchat/downloads/blckchat-lan-alpha.apk) is built, verified and published by the Pages workflow, while GitHub Actions also retains its own internal artifact.
-
-This is **not the promised production GitHub-backed Alpha 1**. It is an internal, openly accessible testing build with real text messages over the same local Wi-Fi. The administrator's Android runs the TCP room server and sends one-use invitation links using the native SMS compose app. Guest Android screens only ask for a name and one tap to join. Messages are encrypted in transit via platform AES-GCM, but the host can read them; there is no audited E2EE, no persistent history, no remote cross-network delivery and no private GitHub synchronization yet.
-
-**Never use this build for sensitive messages.** Android debug signing and an external APK install can trigger normal Android installation warnings. Do not disable Play Protect or ignore malware warnings.
-
-[Plain-Norwegian onboarding guide](https://bspippi1337.github.io/blckchat/guide.html) · [Three-phone manual](docs/ANDROID_LAN_TEST.md) · [Security boundaries](SECURITY.md)
+A local Wi-Fi chat was built during early exploration, but it is **not**
+the current APK and does not work between geographically separate devices.
+Current public downloads use the Android carrier-SMS-first application.
+The legacy Android source remains isolated for reference and must not be
+used as a secure remote messenger.
 
 ## Release policy: first APK must actually message
 
