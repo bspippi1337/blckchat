@@ -56,7 +56,7 @@ public final class MainActivity extends Activity implements LanChat.Events {
     private EditText composer;
     private LanChat chat;
     private boolean admin;
-    private String myName="Pippi";
+    private String myName="PhoneA";
     private String pendingHost="", pendingId="", pendingKey="";
     private String latestInvite="";
 
@@ -200,14 +200,14 @@ public final class MainActivity extends Activity implements LanChat.Events {
         boolean invited=!pendingHost.isEmpty() && !pendingId.isEmpty() && !pendingKey.isEmpty();
         if (invited) {
             header("BLCKCHAT / INVITASJON","Velkommen!",
-                "Pippi har invitert deg til The Workshop. Skriv navnet ditt og trykk Bli med. Du trenger ingen konto.");
-            nameField=field("HVA HETER DU?","Trond eller Thomas","");
+                "PhoneA har invitert deg til The Workshop. Skriv navnet ditt og trykk Bli med. Du trenger ingen konto.");
+            nameField=field("HVA HETER DU?","PhoneB eller PhoneC","");
             addButton(button("BLI MED I SAMTALEN",accent,BG,v->startJoining()),24);
             note("Begge telefonene må være på samme Wi-Fi eller Pippis hotspot. Invitasjonen kan bare brukes én gang, og varer i 10 minutter.",24);
         } else {
             header("BLCKCHAT / INTERN ALFA","En samtale, uten omveier.",
-                "Pippi åpner rommet. Trond og Thomas kommer inn fra SMS-invitasjonen. Dette er en lokal test, ikke ferdig E2EE.");
-            nameField=field("VISNINGSNAVN","Pippi","Pippi");
+                "PhoneA åpner rommet. PhoneB og PhoneC kommer inn fra SMS-invitasjonen. Dette er en lokal test, ikke ferdig E2EE.");
+            nameField=field("VISNINGSNAVN","PhoneA","PhoneA");
             addButton(button("ÅPNE ROM SOM ADMIN",accent,BG,v->startHosting()),24);
             note("Gjester trenger bare åpne SMS-lenken sin. For manuell tilkobling kan du fylle inn feltene under.",24);
             hostField=field("VERTENS WI-FI-ADRESSE","192.168.1.42","");
@@ -253,7 +253,7 @@ public final class MainActivity extends Activity implements LanChat.Events {
         }
         if (!host.matches("[0-9.]{7,15}") || !id.matches("[A-Za-z0-9_-]{16,64}") ||
             !key.matches("[A-Za-z0-9_-]{40,64}")) {
-            if (invited) nameField.setError("Ugyldig invitasjon. Be Pippi om en ny SMS.");
+            if (invited) nameField.setError("Ugyldig invitasjon. Be PhoneA om en ny SMS.");
             else hostField.setError("Åpne hele invitasjonslenken eller fyll inn feltene.");
             return;
         }
@@ -341,7 +341,7 @@ public final class MainActivity extends Activity implements LanChat.Events {
             latestInvite=invite.asUri();
             String page="https://bspippi1337.github.io/blckchat/join.html#lan="
                 +invite.host+"~"+invite.id+"~"+invite.key;
-            String message="Hei! Pippi inviterer deg til BLCKCHAT-testen. "+
+            String message="Hei! PhoneA inviterer deg til BLCKCHAT-testen. "+
                 "1) Åpne lenken og installer appen. "+
                 "2) Åpne samme SMS-lenke igjen og trykk «Åpne BLCKCHAT». "+
                 "Bruk samme Wi-Fi. Lenken varer i 10 minutter. "+page;
