@@ -51,6 +51,8 @@ jobs:
             tests/java/com/blckswan/blckchat/SmsCryptoPrimitivesTest.java
           java -cp /tmp/blckchat-java-tests com.blckswan.blckchat.SmsFrameAssemblerTest
           java -cp /tmp/blckchat-java-tests com.blckswan.blckchat.SmsCryptoPrimitivesTest
+      - name: Static Android lint
+        run: gradle --no-daemon :android:lintDebug
       - name: Build SMS-first experimental APK
         run: gradle --no-daemon --stacktrace :android:assembleDebug
       - name: Verify and stage experimental build
