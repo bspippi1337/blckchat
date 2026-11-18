@@ -37,3 +37,13 @@ Java_com_blckswan_blckchat_MainActivity_nativeValidateMessage(
     (*env)->ReleaseStringUTFChars(env,text,s);
     return JNI_TRUE;
 }
+
+/* BLCKUI theme shared with the carrier-SMS activity. */
+JNIEXPORT jint JNICALL
+Java_com_blckswan_blckchat_RemoteSmsActivity_nativeAccent(
+    JNIEnv *env, jclass cls) {
+    bsui_theme t=bsui_theme_dark();
+    (void)env; (void)cls;
+    return (jint)(0xff000000u | ((uint32_t)t.accent.r<<16u) |
+                  ((uint32_t)t.accent.g<<8u) | (uint32_t)t.accent.b);
+}
