@@ -19,6 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * No-Wi-Fi SMS-first Android alpha. Uses C11 transport framing; device
@@ -49,6 +51,8 @@ public final class RemoteSmsActivity extends Activity {
     private TextView outboxProgress;
     private TextView historyView;
     private LinearLayout pairingPanel;
+    private final List<View> conversationViews=new ArrayList<>();
+    private TextView verificationPrompt;
 
     private int dp(int value){ return (int)(value*getResources().getDisplayMetrics().density+.5f); }
     private GradientDrawable bg(int color,int radius){
@@ -141,6 +145,7 @@ public final class RemoteSmsActivity extends Activity {
         outer.setFillViewport(true);outer.setBackgroundColor(BG);
         body=col();body.setPadding(dp(20),dp(25),dp(20),dp(40));
         outer.addView(body);setContentView(outer);
+        conversationViews.clear();
         TextView eyebrow=label("BLCK / CHAT     42 · SMS FIRST",12,accent,true);
         eyebrow.setLetterSpacing(.16f);body.addView(eyebrow,match());
         TextView title=label("Avstand er ikke et hinder.",31,FG,true);
@@ -186,6 +191,7 @@ public final class RemoteSmsActivity extends Activity {
                           "Identiteten må verifiseres før sending.");
                     sendButton.setEnabled(checked);
                     sendButton.setAlpha(checked?1f:.55f);
+                    updateChatVisibility();
                 }catch(Exception e){showFailure(e);}
             }
         });
@@ -196,6 +202,12 @@ public final class RemoteSmsActivity extends Activity {
         pairingPanel.addView(reset,rp);
         gap(pairingPanel,16);
 
+        verificationPrompt=label("Bekreft først sikkerhetskoden med kontakten. "+
+            "Da åpnes meldingspanelet automatisk.",14,SUB,false);
+        verificationPrompt.setPadding(dp(14),dp(15),dp(14),dp(15));
+        verificationPrompt.setBackground(panel(PANEL,12));
+        gap(verificationPrompt,22);
+        int conversationStart=body.getChildCount();
         TextView compose=label("02 / SKRIV EN KRYPTERT SMS",18,FG,true);
         gap(compose,34);
         outgoing=input("MELDING","Skriv en kort melding…",true);
@@ -235,6 +247,8 @@ public final class RemoteSmsActivity extends Activity {
         historyView.setBackground(panel(PANEL,12));
         gap(historyView,10);
         gap(action("SLETT LOKAL SAMTALEHISTORIKK",false,v->confirmClearHistory()),8);
+        for(int i=conversationStart;i<body.getChildCount();i++)
+            conversationViews.add(body.getChildAt(i));
 
         gap(action("KOPIER ANONYM TESTSTATUS",false,v->copyDiagnostic()),18);
         paragraph("Testrapporten inneholder ikke telefonnummer, meldinger, "+
@@ -339,6 +353,20 @@ public final class RemoteSmsActivity extends Activity {
             "BLCKCHAT anonym teststatus",report));
         status("Anonym teststatus kopiert. Kan sendes til utvikleren.");
     }
+    private void updateChatVisibility(){
+        boolean ready=crypto!=null && crypto.verified();
+        if(verificationPrompt!=null){
+            verificationPrompt.setVisibility(ready?View.GONE:View.VISIBLE);
+            verificationPrompt.setText(crypto!=null && crypto.hasPeer()
+                ?"Ring kontakten og sammenlign sikkerhetskoden ovenfor. "+
+                 "Kryss av når begge kodene er identiske."
+                :"Send den offentlige nøkkelen til mottakeren via SMS, "+
+                 "importer svaret og sammenlign sikkerhetskodene.");
+        }
+        for(View view:conversationViews)
+            view.setVisibility(ready?View.VISIBLE:View.GONE);
+    }
+
     private void updatePairing(){
         if(crypto==null || pairingPanel==null)return;
         boolean ready=crypto.hasPeer();
@@ -352,6 +380,7 @@ public final class RemoteSmsActivity extends Activity {
             sendButton.setEnabled(crypto.verified());
             sendButton.setAlpha(crypto.verified()?1f:.55f);
         }
+        updateChatVisibility();
     }
     private String phone(){
         String p=phone.getText().toString().trim();
@@ -560,7 +589,8 @@ public final class RemoteSmsActivity extends Activity {
     private void askForget(){
         new AlertDialog.Builder(this).setTitle("Fjerne paring?")
             .setMessage("Du mister kontaktverifiseringen og må utveksle nøkler "
-                +"og sammenligne sikkerhetskoden på nytt. Lokal egen nøkkel beholdes.")
+                +"på nytt. All lokal samtalehistorikk og uferdige krypterte "
+                +"SMS-utkast slettes permanent. Egen Keystore-nøkkel beholdes.")
             .setNegativeButton("Avbryt",null)
             .setPositiveButton("Fjern paring",(d,w)->{
                 try{crypto.forgetPeer();inbox.clear();drafts.clear();history.clear();updateOutboxProgress();peerCode.setText("");
