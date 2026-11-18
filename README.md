@@ -62,6 +62,7 @@ The gateway requires private, protected credential/session storage and a durable
 - GitHub login and private room management.
 - SMS integration, single-use invite redemption and guest UI.
 - Reliable GitHub write queue, deduplication and synchronization.
+- Native iOS shell (Swift/Objective-C bridge to C11 core), Keychain credential storage, URL-based invite redemption, and App Store-compatible HTTPS networking.
 - Group confidentiality, device/key verification, revocation and third-party security review.
 
 MIT licensed.
