@@ -1,4 +1,4 @@
-name: Deploy BLCKCHAT site and internal test APK
+name: Deploy BLCKCHAT site and experimental SMS APK
 on:
   push:
     branches: [main]
@@ -41,9 +41,9 @@ jobs:
           SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -path "*/bin/sdkmanager" | sort -V | tail -n 1)"
           test -x "$SDKMANAGER"
           "$SDKMANAGER" --sdk_root="$SDK_ROOT" --install "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.2.12479018"
-      - name: Build local-network trial APK
+      - name: Build SMS-first experimental APK
         run: gradle --no-daemon --stacktrace :android:assembleDebug
-      - name: Check and stage trial build
+      - name: Verify and stage experimental build
         run: |
           set -euo pipefail
           APK="android/build/outputs/apk/debug/android-debug.apk"
@@ -54,11 +54,11 @@ jobs:
           test -x "$SIGNER"
           "$SIGNER" verify --verbose "$APK"
           mkdir -p site/downloads
-          cp "$APK" site/downloads/blckchat-lan-alpha.apk
-          (cd site/downloads && sha256sum blckchat-lan-alpha.apk > SHA256SUMS.txt)
-          test -s site/downloads/blckchat-lan-alpha.apk
+          cp "$APK" site/downloads/blckchat-sms-experimental.apk
+          (cd site/downloads && sha256sum blckchat-sms-experimental.apk > SHA256SUMS.txt)
+          test -s site/downloads/blckchat-sms-experimental.apk
       - uses: actions/configure-pages@v5
-      - name: Upload site and verified test APK
+      - name: Upload site and verified experimental APK
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./site
