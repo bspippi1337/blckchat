@@ -37,6 +37,13 @@ Dette er ikke en sikkerhetsrevidert messenger. Begge telefonene trenger Android 
 <p class="helper">Dette oppsettet har ingen GitHub-konto, ingen serveradresse og intet Wi-Fi-krav. Selve nøkkelutvekslingen kan kreve et par SMS-er.</p>
 </section>
 </div>
+<section id="pair-invite" class="panel" hidden aria-live="polite" style="margin:24px 0">
+<p class="kicker">DIN INVITASJON ER KLAR</p>
+<h2 style="margin-top:0">Åpne nøkkelen i appen</h2>
+<p>Har du installert appen? Trykk knappen for å åpne BLCKCHAT med Phone A sin offentlige nøkkel ferdig utfylt. Du må fortsatt trykke «Importer» og sammenligne sikkerhetskoden over en telefonsamtale før kryptering aktiveres.</p>
+<a id="pair-open-app" href="#" class="button primary">Åpne BLCKCHAT med invitasjonen</a>
+<p id="pair-fallback" class="helper">Hvis knappen ikke åpner appen, kopier den offentlige BC42K-koden fra SMS-invitasjonen og lim den inn manuelt i BLCKCHAT.</p>
+</section>
 <section class="portal-help">
 <h2>Deretter: send og les meldinger</h2>
 <p>Trykk «Send kryptert SMS», kontroller innhold og pris i telefonens vanlige SMS-app og trykk Send. Mottakeren kopierer den krypterte SMS-teksten inn i BLCKCHAT og trykker «Dekrypter». SMS-appen kan også tilby «Del» som sender teksten direkte til BLCKCHAT.</p>
@@ -52,4 +59,18 @@ Dette er ikke en sikkerhetsrevidert messenger. Begge telefonene trenger Android 
 <a href="https://github.com/bspippi1337/blckchat">Kildekode</a> ·
 <a href="downloads/SHA256SUMS.txt">SHA-256-sjekksum</a> ·
 <a href="security.html">Sikkerhetsinformasjon</a></p>
-</main></body></html>
+</main>
+<script>
+(function(){
+  "use strict";
+  const hash=location.hash;
+  if(!hash.startsWith("#k="))return;
+  try{history.replaceState(null,"",location.pathname+location.search);}catch(_){}
+  const key=hash.slice(3);
+  if(!/^[A-Za-z0-9_-]{100,160}$/.test(key))return;
+  const target=document.getElementById("pair-open-app");
+  target.setAttribute("href","blckchat://pair?k="+encodeURIComponent(key));
+  document.getElementById("pair-invite").hidden=false;
+})();
+</script>
+</body></html>
