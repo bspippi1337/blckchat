@@ -1,1 +1,41 @@
-<!doctype html><html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090e15"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"><title>Kom i gang · BLCKCHAT</title></head><body><header class="nav shell"><a class="identity" href="./"><img src="icon.svg" width="34" height="34" alt="">BLCK/CHAT <sup>42</sup></a><nav><a href="./">Hjem</a><a href="join.html">Invitasjon</a><a href="security.html">Sikkerhet</a></nav></header><main class="doc shell"><p class="kicker">KOM I GANG / 2 STEG</p><h1>Fra SMS til samtale.</h1><p class="notice"><strong>Under utvikling:</strong> Dette er den planlagte brukeropplevelsen. Invitasjoner og innlogging fungerer ikke ennå.</p><h2>Du er invitert</h2><ol><li><strong>Installer appen.</strong> Trykk lenken i SMS-en og installer BLCKCHAT fra nettsiden eller appbutikken når den er tilgjengelig.</li><li><strong>Bli med i samtalen.</strong> Åpne den samme SMS-lenken igjen. Appen finner kanalen. Hvis den opprinnelige invitasjonen er gammel, får du en ny engangskode på SMS. Velg navn og trykk «Bli med».</li></ol><p>Du trenger ikke GitHub-konto. Du trenger ikke finne kanalnavn, lime inn serveradresse eller konfigurere noe selv.</p><h2>Den som inviterer</h2><ol><li>Logg på med GitHub én gang og opprett en privat kanal.</li><li>Trykk «Inviter», legg inn mobilnummer og send SMS.</li><li>Velg eventuelt å godkjenne nye deltakere før de slipper inn.</li></ol><h2>Hvis noe stopper opp</h2><p><strong>Invitasjonen er utløpt:</strong> Be om ny SMS-kode. Du trenger ikke installere appen på nytt.</p><p><strong>Appen åpnet ikke automatisk:</strong> Åpne SMS-lenken en gang til.</p><p><strong>Har du byttet telefon:</strong> Be administratoren sende en ny invitasjon.</p><p><strong>iPhone:</strong> iOS-appen må først være signert og distribuert gjennom en Apple-godkjent kanal. Det er ikke klart ennå.</p><h2>Utviklerstatus</h2><p>Dagens C11-prototype støtter bare lokal meldingslagring. Den kan ikke sende SMS, koble til GitHub eller logge inn gjester.</p><p><a href="https://github.com/bspippi1337/blckchat">Se prosjektet på GitHub</a></p></main></body></html>
+<!doctype html>
+<html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090e15">
+<link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
+<title>Enkel bruksanvisning · BLCKCHAT 42</title></head>
+<body><header class="nav shell"><a class="identity" href="./"><img src="icon.svg" width="34" height="34" alt="">BLCK/CHAT <sup>42</sup></a>
+<nav aria-label="Meny"><a href="./">Hjem</a><a href="join.html">Installer</a><a href="security.html">Sikkerhet</a></nav></header>
+<main class="doc shell">
+<p class="kicker">ENKEL BRUKSANVISNING / ANDROID</p>
+<h1>Én app. Tre telefoner. En samtale.</h1>
+<p>BLCKCHAT er laget for at du skal slippe å forstå teknikken som ligger bak. Pippi oppretter rommet. Trond og Thomas får SMS. Så skriver dere til hverandre.</p>
+<p class="notice"><strong>Intern testutgave:</strong> Mobilene må bruke samme Wi-Fi eller Pippis hotspot. Hold appen åpen på Pippis telefon. Dette er ikke ennå en ferdig sikker messenger for privat eller sensitiv kommunikasjon.</p>
+<h2>For Trond og Thomas</h2>
+<ol>
+<li><strong>Trykk lenken i SMS-en fra Pippi.</strong> Da åpnes en nettside med en knapp for å laste ned Android-appen.</li>
+<li><strong>Trykk «Last ned Android-appen».</strong> Når filen er lastet ned, åpner du den og velger «Installer». Android kan be om tillatelse til installasjon fra nettleseren fordi vi tester utenom Play Butikk.</li>
+<li><strong>Åpne den samme SMS-lenken på nytt.</strong> Trykk «Åpne BLCKCHAT og bli med» på nettsiden.</li>
+<li><strong>Velg navn.</strong> Trond skriver «Trond», Thomas skriver «Thomas». Trykk «JOIN THIS ROOM».</li>
+<li><strong>Skriv din første melding.</strong> Hvis Pippi svarer, fungerer samtalen.</li>
+</ol>
+<p>Du trenger ikke GitHub, BankID, noe passord eller å skrive inn en serveradresse selv.</p>
+<p><a class="button primary" href="join.html">Gå til installasjonssiden</a></p>
+<h2>For Pippi (administrator)</h2>
+<ol>
+<li>Installer samme APK, åpne appen og bruk navnet «Pippi».</li>
+<li>Trykk «OPEN A ROOM · ADMIN». Appen starter en lokal meldingsserver på din telefon.</li>
+<li>Sjekk at telefonen viser tilkobling og en lokal Wi-Fi-adresse.</li>
+<li>Skriv Tronds mobilnummer med landskode, for eksempel <code>+47...</code>, og trykk «CREATE INVITE &amp; OPEN SMS». Kontroller og send SMS-en fra telefonens vanlige SMS-app.</li>
+<li>Gjenta for Thomas. Hver mottaker får sin egen invitasjonslenke som bare kan brukes én gang.</li>
+<li>Hold rommet åpent og telefonen våken så lenge gruppen tester.</li>
+</ol>
+<h2>Hvis det stopper opp</h2>
+<p><strong>«Invitasjon utløpt»:</strong> Send en ny SMS fra Pippis telefon. Testinvitasjoner varer i omtrent 10 minutter. Du trenger ikke laste ned APK-en på nytt.</p>
+<p><strong>«Connection failed»:</strong> Kontroller at begge telefonene bruker samme Wi-Fi eller hotspot. Prøv en ny invitasjon mens Pippis app er åpen.</p>
+<p><strong>Android advarer om installasjon:</strong> Det er normalt å få en tillatelsesdialog for apper utenfor Play Butikk. Kontroller at lenken er <code>bspippi1337.github.io/blckchat/</code>. Hvis Android uttrykkelig advarer om skadevare, stopp og gi beskjed. Ikke slå av Play Protect.</p>
+<p><strong>Du ser ingen tidligere meldinger:</strong> Testutgaven lagrer bare de siste meldingene i minnet på Pippis telefon. Dette blir forbedret.</p>
+<p><strong>iPhone:</strong> APK-en kan ikke installeres på iOS. iPhone-klienten er fortsatt under arbeid.</p>
+<h2>Hva tester vi?</h2>
+<p>Tre telefoner sender og mottar virkelige tekstmeldinger via et lokalt Wi-Fi-nett. Dette er den første nettverksutgaven. Synkronisering via GitHub, persistens og sikkerhetsrevidert ende-til-ende-kryptering kommer i senere utgaver.</p>
+<p class="fine"><a href="https://github.com/bspippi1337/blckchat">Kildekode</a> · <a href="security.html">Sikkerhet</a> · <a href="downloads/SHA256SUMS.txt">Filens kontrollsum</a></p>
+</main></body></html>
