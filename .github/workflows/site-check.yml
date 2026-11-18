@@ -40,6 +40,15 @@ jobs:
           assert html["test.html"].count('data-test-id="') == 9
           assert 'src="test.js"' in html["test.html"]
           assert "prefers-reduced-motion" in (root/"style.css").read_text(encoding="utf-8")
+          # Approved brand artwork is static, present on both surfaces,
+          # and exactly the same encoded WebP for web and Android.
+          brand=root/"assets/blckchat-42-official.webp"
+          app_brand=Path("android/src/main/res/drawable-nodpi/blckchat_wordmark.webp")
+          assert brand.is_file() and app_brand.is_file(), "Missing official wordmark"
+          assert brand.read_bytes()==app_brand.read_bytes(), "Web and Android artwork drifted"
+          assert brand.read_bytes()[:4]==b"RIFF" and brand.read_bytes()[8:12]==b"WEBP", "Invalid WebP file"
+          assert 'class="brand-visual"' in html["index.html"], "Brand picture not on homepage"
+          assert 'class="brand-motion"' not in html["index.html"], "Legacy animation still visible"
           blocked=re.compile(r"\b(pippi|trond|thomas)\b",re.I)
           for name,body in html.items():
               assert not blocked.search(body), f"Public page {name} exposes a tester name"

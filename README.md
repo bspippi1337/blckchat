@@ -15,6 +15,21 @@ A minimal GitHub-backed group messenger, written primarily in ISO C11.
 
 **A gateway is necessary.** GitHub cannot safely accept anonymous guest messages directly to a private repository. A small C11 gateway authenticates guest sessions, stores the administrator's GitHub credential outside the repository, validates permissions and acts as the only GitHub API writer/reader. GitHub Actions and Pages are *not* a substitute for an always-available private gateway.
 
+## Brand identity: C first, black hat second
+
+The official BLCKCHAT 42 brand uses a static optical illusion, not a morphing
+animation. The C in CHAT remains approximately **85% readable C**; its subtle
+low-opacity fedora suggestion contributes the remaining 15%. Black-hat is a
+second-look nod to security culture, never a replacement for the product name.
+
+- [Approved optimized hero image](site/assets/blckchat-42-official.webp): 1000×318 WebP, served on GitHub Pages.
+- [Website favicon](site/icon.svg): native SVG C/fedora mark for small sizes.
+- [Android launcher vector](android/src/main/res/drawable/blck_logo.xml): matching vector mark.
+- [Bundled Android screen wordmark](android/src/main/res/drawable-nodpi/blckchat_wordmark.webp): **byte-identical** to the published WebP, displayed offline on the SMS pairing screen.
+- [Brand usage and asset provenance](docs/VISUAL_IDENTITY.md).
+
+Branding does not change encryption or SMS handling; app version **0.4.1** includes the same prototype SMS transport with refreshed visuals.
+
 ## Active Android build: REMOTE SMS Alpha 2
 
 **Phone A (Admin) and Phone B can exchange encrypted SMS messages while in different locations.** Android 12+ is required for the Android Keystore P-256 ECDH implementation. An active SIM and standard SMS app are used; no common Wi-Fi, GitHub account or backend is needed for this two-phone trial.

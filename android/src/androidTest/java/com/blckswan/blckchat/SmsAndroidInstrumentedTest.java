@@ -13,6 +13,21 @@ import static org.junit.Assert.*;
 /** Emulator/device smoke coverage. No SMS is sent or any phone contacted. */
 @RunWith(AndroidJUnit4.class)
 public final class SmsAndroidInstrumentedTest {
+    @Test public void approvedBrandArtworkDecodesOnAndroid() {
+        Context app=InstrumentationRegistry.getInstrumentation().getTargetContext();
+        android.graphics.Bitmap mark=android.graphics.BitmapFactory.decodeResource(
+            app.getResources(),R.drawable.blckchat_wordmark);
+        assertNotNull("Approved bundled WebP must decode on device",mark);
+        try {
+            assertEquals("Official wordmark width",1000,mark.getWidth());
+            assertEquals("Official wordmark height",318,mark.getHeight());
+        }finally {
+            mark.recycle();
+        }
+        assertNotNull("C/fedora launcher mark",
+            app.getDrawable(R.drawable.blck_logo));
+    }
+
     @Test public void realAndroidKeystoreEcdhWorks() throws Exception {
         Context context=InstrumentationRegistry.getInstrumentation().getTargetContext();
         SmsE2ee e2ee=new SmsE2ee(context);
