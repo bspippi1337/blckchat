@@ -17,7 +17,7 @@ A minimal GitHub-backed group messenger, written primarily in ISO C11.
 
 ## Android LAN Alpha: real test messages
 
-**Download for Pippi, Trond and Thomas:** [Simple Android installation page](https://bspippi1337.github.io/blckchat/join.html). The [direct test APK](https://bspippi1337.github.io/blckchat/downloads/blckchat-lan-alpha.apk) is built, verified and published by the Pages workflow, while GitHub Actions also retains its own internal artifact.
+**Download for Phone A (Admin), Phone B and Phone C:** [Simple Android installation page](https://bspippi1337.github.io/blckchat/join.html). The [direct test APK](https://bspippi1337.github.io/blckchat/downloads/blckchat-lan-alpha.apk) is built, verified and published by the Pages workflow, while GitHub Actions also retains its own internal artifact.
 
 This is **not the promised production GitHub-backed Alpha 1**. It is an internal, openly accessible testing build with real text messages over the same local Wi-Fi. The administrator's Android runs the TCP room server and sends one-use invitation links using the native SMS compose app. Guest Android screens only ask for a name and one tap to join. Messages are encrypted in transit via platform AES-GCM, but the host can read them; there is no audited E2EE, no persistent history, no remote cross-network delivery and no private GitHub synchronization yet.
 
