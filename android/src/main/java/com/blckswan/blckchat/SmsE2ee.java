@@ -197,7 +197,8 @@ public final class SmsE2ee {
         byte[] prk=mac.doFinal(shared);
         Arrays.fill(shared,(byte)0);
         mac.init(new SecretKeySpec(prk,"HmacSHA256"));
-        // Direction is bound to the sender identity; a sent SMS cannot be\n        // reflected back as a valid incoming message.\n        byte[] key=mac.doFinal(join(CONTEXT,senderPublic,new byte[]{1}));
+        // The direction-specific key prevents ciphertext reflection.
+        byte[] key=mac.doFinal(join(CONTEXT,senderPublic,new byte[]{1}));
         Arrays.fill(prk,(byte)0);
         return key;
     }
