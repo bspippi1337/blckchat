@@ -179,7 +179,7 @@ public final class SmsE2ee {
         if(!store.edit().remove(PEER).remove(VERIFIED).remove(SEEN).commit())
             throw new IllegalStateException("Kunne ikke nullstille kontakten");
     }
-    private byte[] deriveKey() throws Exception {
+    private byte[] deriveKey(byte[] senderPublic) throws Exception {
         if(!verified())throw new SecurityException("Sammenlign sikkerhetskoden først");
         byte[] peer=peerBytes();
         java.security.KeyStore ks=KeyStore.getInstance("AndroidKeyStore");
@@ -197,7 +197,7 @@ public final class SmsE2ee {
         byte[] prk=mac.doFinal(shared);
         Arrays.fill(shared,(byte)0);
         mac.init(new SecretKeySpec(prk,"HmacSHA256"));
-        byte[] key=mac.doFinal(join(CONTEXT,new byte[]{1}));
+        // Direction is bound to the sender identity; a sent SMS cannot be\n        // reflected back as a valid incoming message.\n        byte[] key=mac.doFinal(join(CONTEXT,senderPublic,new byte[]{1}));
         Arrays.fill(prk,(byte)0);
         return key;
     }
@@ -225,7 +225,7 @@ public final class SmsE2ee {
            message.indexOf('\u0000')>=0)
             throw new IllegalArgumentException("Bruk mellom 1 og 650 UTF-8-byte");
         String id=randomId();
-        byte[] key=deriveKey(),nonce=new byte[12];
+        byte[] key=deriveKey(publicKey.getEncoded()),nonce=new byte[12];
         try {
             RNG.nextBytes(nonce);
             Cipher cipher=Cipher.getInstance("AES/GCM/NoPadding");
@@ -256,7 +256,7 @@ public final class SmsE2ee {
         if(ciphertext==null || ciphertext.length<28)
             throw new SecurityException("Meldingen er ufullstendig eller skadet");
         byte[] nonce=Arrays.copyOfRange(ciphertext,0,12);
-        byte[] key=deriveKey();
+        byte[] key=deriveKey(peerBytes());
         try {
             Cipher cipher=Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(Cipher.DECRYPT_MODE,new SecretKeySpec(key,"AES"),
