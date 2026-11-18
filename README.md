@@ -15,6 +15,14 @@ A minimal GitHub-backed group messenger, written primarily in ISO C11.
 
 **A gateway is necessary.** GitHub cannot safely accept anonymous guest messages directly to a private repository. A small C11 gateway authenticates guest sessions, stores the administrator's GitHub credential outside the repository, validates permissions and acts as the only GitHub API writer/reader. GitHub Actions and Pages are *not* a substitute for an always-available private gateway.
 
+## Current development direction: REMOTE SMS E2EE, not LAN-only
+
+**The next working messenger must work between geographically separated phones.** Phone A (Admin), Phone B and Phone C are public role names. First transport: carrier SMS with verified end-to-end encryption and clear onboarding. Next transport: authenticated mobile-data gateway carrying the same opaque encrypted message envelopes. Wi-Fi sharing must never be a requirement.
+
+The existing Wi-Fi APK is a **historical LAN test only** and cannot connect remote participants. It is not E2EE. Do not send it as a substitute for a real remote messenger. A tested C11 `blcksms_frame` codec now fragments and reassembles opaque ciphertext, but an audited E2EE provider, identity verification and Android SMS ciphertext UX are still missing.
+
+[Remote SMS E2EE implementation plan](docs/REMOTE_SMS_E2EE.md) · [Security constraints](SECURITY.md)
+
 ## Android LAN Alpha: real test messages
 
 **Download for Phone A (Admin), Phone B and Phone C:** [Simple Android installation page](https://bspippi1337.github.io/blckchat/join.html). The [direct test APK](https://bspippi1337.github.io/blckchat/downloads/blckchat-lan-alpha.apk) is built, verified and published by the Pages workflow, while GitHub Actions also retains its own internal artifact.
