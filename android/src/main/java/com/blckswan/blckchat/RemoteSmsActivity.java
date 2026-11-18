@@ -144,6 +144,8 @@ public final class RemoteSmsActivity extends Activity {
         status=label("Nøkkelen din lagres lokalt i Android Keystore.",12,accent,false);
         status.setPadding(dp(14),dp(13),dp(14),dp(13));
         status.setBackground(panel(PANEL,12));gap(status,18);
+        gap(action("KJØR KRYPTO-SELVTEST PÅ DENNE TELEFONEN",false,
+            v->selfTest()),10);
         paragraph("TESTVERSJON: Begge trenger Android 12+. Dette er en eksperimentell "
             +"parvis kryptert SMS-chat, ikke sikkerhetsrevidert eller Signal-ekvivalent. "
             +"SMS-operatøren ser hvem som sender til hvem.",15);
@@ -213,6 +215,27 @@ public final class RemoteSmsActivity extends Activity {
                 "https://bspippi1337.github.io/blckchat/")));
         }),20);
         updatePairing();
+    }
+    private void selfTest(){
+        status("Tester Android Keystore, nøkkelutveksling og AES-GCM lokalt…");
+        Thread worker=new Thread(()->{
+            try {
+                crypto.runDeviceSelfTest();
+                runOnUiThread(()->{
+                    status("Selvtest bestått. Du kan utveksle offentlig nøkkel.");
+                    new AlertDialog.Builder(this)
+                        .setTitle("Lokal krypteringstest bestått")
+                        .setMessage("Android Keystore, ECDH, HKDF og AES-GCM fungerer "+
+                            "på denne telefonen. Dette bekrefter ikke en ekte "+
+                            "melding til en annen telefon eller sikkerhetsrevisjon.")
+                        .setPositiveButton("OK",null).show();
+                });
+            }catch(Exception e) {
+                runOnUiThread(()->showFailure(e));
+            }
+        },"blck-crypto-selftest");
+        worker.setDaemon(true);
+        worker.start();
     }
     private void updatePairing(){
         if(crypto==null || pairingPanel==null)return;
