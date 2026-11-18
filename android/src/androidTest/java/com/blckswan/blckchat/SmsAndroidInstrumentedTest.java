@@ -68,6 +68,29 @@ public final class SmsAndroidInstrumentedTest {
         reopened.close();
     }
 
+    @Test public void invalidPeerCurvesAndTamperedPointsAreRejected() throws Exception {
+        Context context=InstrumentationRegistry.getInstrumentation().getTargetContext();
+        SmsE2ee sms=new SmsE2ee(context);
+        java.security.KeyPairGenerator gen=java.security.KeyPairGenerator.getInstance("EC");
+
+        gen.initialize(new java.security.spec.ECGenParameterSpec("secp384r1"));
+        byte[] wrongCurve=gen.generateKeyPair().getPublic().getEncoded();
+        boolean rejected=false;
+        try {
+            sms.importPairingCode("BC42K|1|"+SmsE2ee.encode(wrongCurve));
+        }catch(Exception expected) {rejected=true;}
+        assertTrue("Wrong elliptic curve must be rejected",rejected);
+
+        gen.initialize(new java.security.spec.ECGenParameterSpec("secp256r1"));
+        byte[] altered=gen.generateKeyPair().getPublic().getEncoded();
+        altered[altered.length-1]^=1;
+        rejected=false;
+        try {
+            sms.importPairingCode("BC42K|1|"+SmsE2ee.encode(altered));
+        }catch(Exception expected) {rejected=true;}
+        assertTrue("Tampered P-256 point must be rejected",rejected);
+    }
+
     @Test public void appDoesNotRequestSmsOrInternetPermissions() throws Exception {
         Context context=InstrumentationRegistry.getInstrumentation().getTargetContext();
         PackageInfo info=context.getPackageManager().getPackageInfo(
