@@ -295,8 +295,13 @@ public final class RemoteSmsActivity extends Activity {
         return p;
     }
     private void composeSms(String message){
+        composeSmsTo(phone(),message);
+    }
+    private void composeSmsTo(String recipient,String message){
+        if(recipient==null || !recipient.matches("\\+[1-9][0-9]{7,14}"))
+            throw new IllegalArgumentException("Ugyldig mottakernummer");
         Intent sms=new Intent(Intent.ACTION_SENDTO);
-        sms.setData(Uri.parse("smsto:"+Uri.encode(phone())));
+        sms.setData(Uri.parse("smsto:"+Uri.encode(recipient)));
         sms.putExtra("sms_body",message);
         try {
             startActivity(sms);
@@ -336,7 +341,7 @@ public final class RemoteSmsActivity extends Activity {
                     "Først må du fullføre eller forkaste tidligere kryptert SMS.");
             String plain=outgoing.getText().toString().trim();
             String wire=crypto.encrypt(plain);
-            drafts.remember(wire);
+            drafts.remember(wire,phone(),crypto.verifiedPeerHash());
             outgoing.setText("");
             updateOutboxProgress();
             showCurrentPart();
@@ -369,6 +374,7 @@ public final class RemoteSmsActivity extends Activity {
                 return;
             }
             String recipient=phone();
+            drafts.verifyRecipient(recipient,crypto.verifiedPeerHash());
             int current=drafts.currentPartIndex()+1;
             int total=drafts.partCount();
             if(part.length()>153)
@@ -381,7 +387,10 @@ public final class RemoteSmsActivity extends Activity {
                 .setNegativeButton("Senere",null)
                 .setPositiveButton("Åpne SMS-appen",(dialog,which)->{
                     try {
-                        composeSms(part);
+                        drafts.verifyRecipient(phone(),crypto.verifiedPeerHash());
+                        if(!part.equals(drafts.currentPart()))
+                            throw new SecurityException("SMS-utkastet er endret");
+                        composeSmsTo(recipient,part);
                         status("Kryptert del "+current+" av "+total+
                             " ligger i SMS-appen. Sending ikke bekreftet.");
                     }catch(Exception ex){showFailure(ex);}
@@ -409,7 +418,7 @@ public final class RemoteSmsActivity extends Activity {
                 .setNegativeButton("Ikke ennå",null)
                 .setPositiveButton("Ja, sendt",(dialog,which)->{
                     try {
-                        boolean finished=drafts.confirmCurrentPart();
+                        boolean finished=drafts.confirmCurrentPart(phone(),crypto.verifiedPeerHash());
                         updateOutboxProgress();
                         if(finished)
                             status("Alle "+total+" SMS-deler er manuelt bekreftet "+
