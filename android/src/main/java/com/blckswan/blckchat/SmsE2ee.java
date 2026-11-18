@@ -365,6 +365,13 @@ public final class SmsE2ee {
             Arrays.fill(ciphertext,(byte)0);
         }
     }
+    /** Stable public-key hash only for a verified, unchanged peer identity. */
+    public String verifiedPeerHash() throws Exception {
+        if(!verified())
+            throw new SecurityException("Bekreft kontaktens sikkerhetskode først");
+        return peerFingerprint();
+    }
+
     private String peerFingerprint() throws Exception {
         byte[] hash=sha256(peerBytes());
         StringBuilder out=new StringBuilder(hash.length*2);
