@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- LAN legacy module exists in source, but SMS mode does not require Wi-Fi. -->
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- SMS Alpha requests no INTERNET, SEND_SMS, or READ_SMS permissions. -->
     <uses-feature android:name="android.hardware.telephony" android:required="false"/>
     <application android:label="BLCKCHAT 42" android:icon="@drawable/blck_logo"
         android:roundIcon="@drawable/blck_logo"
