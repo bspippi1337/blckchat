@@ -2,16 +2,16 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-static blck_session session(const char *name, blck_role role) {
-    blck_session s={0};
+static blck_authz_session session(const char *name, blck_role role) {
+    blck_authz_session s={0};
     (void)strcpy(s.room,"workshop"); (void)strcpy(s.subject,name);
     s.role=role; s.expires_at=300; s.verified=1; return s;
 }
 int main(void) {
-    blck_session pippi=session("Pippi",BLCK_ROLE_ADMIN);
-    blck_session trond=session("Trond",BLCK_ROLE_MEMBER);
-    blck_session thomas=session("Thomas",BLCK_ROLE_MEMBER);
-    blck_session guest=session("NewGuest",BLCK_ROLE_INVITED);
+    blck_authz_session pippi=session("Pippi",BLCK_ROLE_ADMIN);
+    blck_authz_session trond=session("Trond",BLCK_ROLE_MEMBER);
+    blck_authz_session thomas=session("Thomas",BLCK_ROLE_MEMBER);
+    blck_authz_session guest=session("NewGuest",BLCK_ROLE_INVITED);
     assert(blck_authorized(&pippi,"workshop",BLCK_ACT_INVITE,200));
     assert(blck_authorized(&pippi,"workshop",BLCK_ACT_POST,200));
     assert(blck_authorized(&trond,"workshop",BLCK_ACT_POST,200));
