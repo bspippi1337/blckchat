@@ -8,7 +8,7 @@ CRYPTO_LIBS = -lcrypto
 endif
 
 .PHONY: all test clean preview
-all: blckchat blckchat-gui-preview blckchat-sms-test blckchat-authz-test blckchat-room-test blckchat-security-test blckchat-header-test
+all: blckchat blckchat-gui-preview blckchat-sms-test blckchat-authz-test blckchat-room-test blckchat-security-test blckchat-header-test blckchat-sms-frame-test
 
 blckchat: src/main.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $<
@@ -31,6 +31,9 @@ blckchat-security-test: tests/security_edge.c src/blckroom.c src/blcksecure_open
 blckchat-header-test: tests/include_both.c include/blckauthz.h include/blckroom.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ tests/include_both.c
 
+blckchat-sms-frame-test: tests/sms_frame.c src/blcksms_frame.c include/blcksms_frame.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ tests/sms_frame.c src/blcksms_frame.c
+
 preview: blckchat-gui-preview
 	./blckchat-gui-preview blckchat-preview.svg
 
@@ -40,6 +43,7 @@ test: all
 	./blckchat-authz-test
 	./blckchat-room-test
 	./blckchat-security-test
+	./blckchat-sms-frame-test
 	./blckchat-header-test
 	./blckchat-gui-preview blckchat-preview.svg
 	grep -q 'BLCK / CHAT' blckchat-preview.svg
