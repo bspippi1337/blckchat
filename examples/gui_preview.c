@@ -3,9 +3,9 @@
 int main(int argc,char **argv) {
     bsui_scene scene;
     const bsui_message messages[]={
-        {"MONICA","Good evening!",0},
+        {"CONTACT","Good evening!",0},
         {"YOU","Welcome to BLCKCHAT 42.",1},
-        {"MONICA","This looks much cleaner.",0},
+        {"CONTACT","This looks much cleaner.",0},
         {"YOU","One channel, no GitHub account needed.",1}
     };
     const char *out=argc>1?argv[1]:"blckchat-preview.svg";
