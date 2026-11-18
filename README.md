@@ -29,7 +29,7 @@ Required acceptance checks:
 7. TLS verification is active, tokens are scoped and stored securely, no plaintext credentials in APK or git.
 8. APK is signed, installable, and download link points to the actual produced binary.
 
-Build jobs may generate internal test artifacts during development; public download labels must distinguish prefunctional artifacts and not claim a working messenger. An internet-reachable gateway deployment, SMS provider, and admin GitHub authorization are prerequisites. A GitHub Pages-only deployment is insufficient.
+Build jobs may generate internal test artifacts during development; public download labels must distinguish prefunctional artifacts and not claim a working messenger. An internet-reachable gateway deployment, operational admin-phone SMS sender, and admin GitHub authorization are prerequisites. A GitHub Pages-only deployment is insufficient.
 
 ## Administrator phone as SMS gateway
 
@@ -47,7 +47,7 @@ The formatting module and Android adapter are present, with native C11 formatter
 
 ## State
 
-**Alpha 0.1: foundation only.** Local CLI journal, build and tests. No working GitHub gateway, SMS sending, invites, guest sessions or encryption yet. Do not use it for sensitive conversations. GitHub transport is eventual-consistency, not real-time.
+**Alpha foundation, not yet an app.** Local CLI journal, C11 GUI scene prototype, SMS formatter, deny-by-default role policy, and a tested RAM-only three-person room engine with one-time OTPs and revocation. No deployed GitHub gateway, automatic SMS queue, durable messaging, native mobile clients or end-to-end encryption yet. Do not use for sensitive conversations. GitHub transport is eventual-consistency, not real-time. See [SECURITY.md](SECURITY.md).
 
 ## Build and local smoke test
 
@@ -76,10 +76,10 @@ The local journal is **plain text encoded as hexadecimal**, not encrypted. It us
 
 1. Admin signs into GitHub and creates a private room via the gateway.
 2. Admin enters guest phone number and chooses invite TTL, default **10 minutes**.
-3. Gateway produces a **CSPRNG-generated opaque 256-bit token**. The token is never committed to GitHub. The gateway stores only a keyed digest and metadata (room, expiry, single-use, invite creator).
-4. SMS provider sends `https://chat.example/join#token=...` or an equivalent secure deep link. The fragment is handled client-side, never included in an HTTP referrer/request URL automatically.
-5. Guest opens link, submits token to gateway over HTTPS, and receives a limited session. Redeeming the token atomically marks it used.
-6. Guest selects a display name and can join the same chat room. Admin can kick/revoke guest sessions.
+3. Gateway generates a non-authenticating room invitation locator with its own bounded lifetime. This locator does not grant access or reveal private chat data.
+4. Admin Android phone sends an invitation SMS linking to `https://bspippi1337.github.io/blckchat/join.html#i=...`; the guest installs the app first. This is only a locator, not a bearer token.
+5. After installation, guest reopens the link. Gateway queues a new short-lived eight-digit code to the admin phone for SMS transmission. The guest submits this OTP to gateway over authenticated TLS; the gateway rate-limits attempts and atomically marks the OTP redeemed.
+6. Guest chooses a display name and gets a room-scoped session. Admin can kick/revoke guests. Unregistered guests do not need GitHub accounts.
 
 The gateway requires private, protected credential/session storage and a durable atomic invite-redemption store. Prefer short-lived cookies with Secure, HttpOnly and SameSite where a browser frontend is used. Never log invite tokens or pass them into analytics. SMS messages may be forwarded, intercepted or SIM-swapped, so the token proves **possession**, not verified identity. Admin should be able to require approval after redemption. Use fixed maximum token lifetimes, rate limits and per-number SMS throttles.
 
