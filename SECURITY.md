@@ -45,6 +45,39 @@ gateway cannot prevent a compromised client from leaking plaintext.
 provide E2EE or remotely accessible chat, durable storage, GitHub transport,
 automatic OTP delivery, mobile sessions, or a production-ready API.**
 
+## Experimental carrier-SMS E2EE client (not audited)
+
+Android SMS Alpha 2 now contains a manually operated two-device messaging path:
+
+- Android 12+ Keystore-generated P-256 ECDH identity; private key cannot be
+  exported through the app, and the app fails closed if the provider is absent.
+- Peer public keys exchanged as SMS records. Neither identity is trusted
+  until both users independently compare and confirm the identical safety
+  code. Silent public-key replacement is blocked.
+- P-256 ECDH secret -> HKDF-SHA256 -> sender-direction AES-256-GCM key.
+  Each ciphertext uses a fresh random 96-bit nonce. The associated data
+  authenticates both public identities and a random 128-bit message ID.
+- Strict C11 SMS ciphertext framing and reassembly; duplicates rejected
+  with locally persisted message identifiers.
+- Carrier SMS sending through Android's system compose UI; incoming
+  ciphertext manually pasted or explicitly shared. No automatic SMS
+  reading or sending permission is requested in the guest APK.
+- No LAN or internet connection is necessary for the SMS path.
+
+**Limitations:** This is static-pair ECDH, NOT the Signal protocol, Double
+Ratchet, MLS or forward-secret messaging. Compromise of a device's
+long-lived ECDH key exposes older captured SMS ciphertext for that peer.
+There is no device-independent backup recovery, multi-party E2EE,
+post-compromise security, audited key verification UX, traffic analysis
+protection, guaranteed SMS delivery or cross-platform iOS client.
+A shared phone number is not by itself authentication. SMS operators
+see metadata. Android OS compromise defeats local confidentiality.
+
+An Android CI build only verifies compilation and packages an APK;
+it does not prove safe operation on physical phones. Until real Phone A
+and Phone B tests plus independent security review, the release is
+**experimental, not suitable for sensitive use**.
+
 ## State-machine controls
 
 - Invite locator is an unprivileged reference valid for up to seven days;
