@@ -44,6 +44,8 @@ jobs:
             tests/java/com/blckswan/blckchat/SmsCryptoPrimitivesTest.java
           java -cp /tmp/blckchat-java-tests com.blckswan.blckchat.SmsFrameAssemblerTest
           java -cp /tmp/blckchat-java-tests com.blckswan.blckchat.SmsCryptoPrimitivesTest
+      - name: Static Android lint
+        run: gradle --no-daemon :android:lintDebug
       - name: Assemble remote SMS experimental APK
         run: gradle --no-daemon --stacktrace :android:assembleDebug
       - name: Enforce zero-permission SMS alpha and correct launcher
