@@ -6,7 +6,7 @@
  */
 #include <stddef.h>
 
-#define BLCKSMS_MAX_PHONE 16u
+#define BLCKSMS_MAX_PHONE 17u
 #define BLCKSMS_MAX_TEXT 384u
 #define BLCKSMS_INVITE_ID_MAX 64u
 
