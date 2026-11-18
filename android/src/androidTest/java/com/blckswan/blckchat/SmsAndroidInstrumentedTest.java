@@ -91,28 +91,46 @@ public final class SmsAndroidInstrumentedTest {
         assertTrue("Tampered P-256 point must be rejected",rejected);
     }
 
-    @Test public void encryptedSmsDraftSurvivesRestartAndRejectsOverwrite() {
+    @Test public void encryptedSmsDraftSurvivesRestartAndRequiresPerPartConfirmation() {
         Context context=InstrumentationRegistry.getInstrumentation().getTargetContext();
         SmsDraftStore store=new SmsDraftStore(context);
         store.clear();
         String id="00112233445566778899aabbccddeeff";
         String secondId="ffeeddccbbaa99887766554433221100";
-        byte[] sealed=new byte[64];
+        byte[] sealed=new byte[240];
         Arrays.fill(sealed,(byte)0x5a);
         String first=NativeSmsCodec.pack(sealed,id);
         String other=NativeSmsCodec.pack(sealed,secondId);
         assertNotNull(first);
         assertNotNull(other);
+        int expected=first.split("\\n").length;
+        assertTrue("Must exercise multiple SMS segments",expected>1);
         store.remember(first);
         assertEquals(first,new SmsDraftStore(context).pending());
         store.remember(first); // same ciphertext is idempotent
+        assertEquals(0,store.currentPartIndex());
+        assertEquals(expected,store.partCount());
+        String[] parts=first.split("\\n");
+        assertEquals(parts[0],store.currentPart());
         boolean rejected=false;
-        try{store.remember(other);}catch(IllegalStateException expected){
+        try{store.remember(other);}catch(IllegalStateException exception){
             rejected=true;
         }
         assertTrue("Must not overwrite an unconfirmed ciphertext",rejected);
-        store.clear();
+        for(int i=0;i<expected;i++) {
+            SmsDraftStore reopened=new SmsDraftStore(context);
+            assertEquals(i,reopened.currentPartIndex());
+            assertEquals(parts[i],reopened.currentPart());
+            boolean finished=reopened.confirmCurrentPart();
+            if(i+1<expected) {
+                assertFalse("Do not mark finished before final frame",finished);
+                assertEquals(i+1,new SmsDraftStore(context).currentPartIndex());
+            }else {
+                assertTrue("Final explicit user confirmation clears draft",finished);
+            }
+        }
         assertNull(new SmsDraftStore(context).pending());
+        assertEquals(0,new SmsDraftStore(context).partCount());
     }
 
     @Test public void appDoesNotRequestSmsOrInternetPermissions() throws Exception {
