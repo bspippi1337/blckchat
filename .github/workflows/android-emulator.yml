@@ -53,8 +53,13 @@ jobs:
           script: |
             set -e
             gradle --no-daemon :android:connectedDebugAndroidTest --stacktrace
-            mkdir -p android/build/ui-capture
+            # Android's test runner can uninstall the target APK after tests.
+            # Reinstall the EXACT APK just tested before UI capture.
+            APK="android/build/outputs/apk/debug/android-debug.apk"
+            test -s "$APK"
+            adb install -r "$APK"
             adb shell am start -n com.blckswan.blckchat.debug/com.blckswan.blckchat.RemoteSmsActivity
+            mkdir -p android/build/ui-capture
             sleep 3
             adb exec-out screencap -p > android/build/ui-capture/sms-alpha-onboarding.png
             test -s android/build/ui-capture/sms-alpha-onboarding.png
