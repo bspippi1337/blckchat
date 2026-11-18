@@ -1,7 +1,23 @@
 name: C11 core, BLCKUI and security engine
 on:
   push:
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'examples/**'
+      - 'tests/*.c'
+      - 'tests/*.sh'
+      - 'Makefile'
+      - '.github/workflows/c11.yml'
   pull_request:
+    paths:
+      - 'src/**'
+      - 'include/**'
+      - 'examples/**'
+      - 'tests/*.c'
+      - 'tests/*.sh'
+      - 'Makefile'
+      - '.github/workflows/c11.yml'
 permissions:
   contents: read
 concurrency:
