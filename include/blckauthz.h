@@ -20,7 +20,7 @@ typedef struct {
     blck_role role;
     unsigned verified;
     unsigned revoked;
-} blck_session;
-int blck_authorized(const blck_session *session, const char *room,
+} blck_authz_session;
+int blck_authorized(const blck_authz_session *session, const char *room,
                     blck_action action, uint64_t now);
 #endif
