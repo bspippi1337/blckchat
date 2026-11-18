@@ -117,6 +117,22 @@ public final class SmsE2ee {
     private static byte[] orderedKeys(byte[] a,byte[] b) {
         return order(a,b)<0?join(a,b):join(b,a);
     }
+    private static volatile ECParameterSpec expectedCurve;
+    private static ECParameterSpec expectedP256() throws Exception {
+        ECParameterSpec cached=expectedCurve;
+        if(cached!=null)return cached;
+        synchronized(SmsE2ee.class) {
+            cached=expectedCurve;
+            if(cached==null) {
+                KeyPairGenerator generator=KeyPairGenerator.getInstance("EC");
+                generator.initialize(new ECGenParameterSpec("secp256r1"));
+                cached=((ECPublicKey)generator.generateKeyPair()
+                    .getPublic()).getParams();
+                expectedCurve=cached;
+            }
+        }
+        return cached;
+    }
     private static PublicKey parsePublic(byte[] encoded) throws Exception {
         if(encoded.length<80 || encoded.length>120)
             throw new SecurityException("Uventet nøkkellengde");
@@ -126,9 +142,7 @@ public final class SmsE2ee {
             throw new SecurityException("Feil nøkkeltype");
         ECPublicKey ec=(ECPublicKey)key;
         // Only our supported named NIST P-256 curve, not arbitrary EC params.
-        KeyPairGenerator check=KeyPairGenerator.getInstance("EC");
-        check.initialize(new ECGenParameterSpec("secp256r1"));
-        ECParameterSpec wanted=((ECPublicKey)check.generateKeyPair().getPublic()).getParams();
+        ECParameterSpec wanted=expectedP256();
         ECParameterSpec got=ec.getParams();
         if(!(got.getCurve().getField() instanceof ECFieldFp) ||
            !got.getCurve().getField().equals(wanted.getCurve().getField()) ||
