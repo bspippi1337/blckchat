@@ -1,0 +1,16 @@
+name: C11 core and BLCKUI
+on:
+  push:
+  pull_request:
+jobs:
+  portable:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test
+        run: make clean && make test
+      - name: Check SVG preview
+        run: test -s blckchat-preview.svg
