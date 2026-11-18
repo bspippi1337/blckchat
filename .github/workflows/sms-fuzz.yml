@@ -1,0 +1,31 @@
+name: C11 SMS fuzz and memory safety
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/blcksms_frame.c'
+      - 'include/blcksms_frame.h'
+      - 'tests/sms_frame_fuzz.c'
+      - '.github/workflows/sms-fuzz.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: c11-sms-fuzz-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  sanitizer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build C11 SMS fuzzer with ASan and UBSan
+        run: |
+          clang -O1 -g -std=c11 -Wall -Wextra -Werror -pedantic \
+            -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer \
+            -Iinclude tests/sms_frame_fuzz.c src/blcksms_frame.c \
+            -o /tmp/blckchat-sms-fuzz
+      - name: Fuzz malformed SMS and ciphertext round trips
+        run: |
+          /tmp/blckchat-sms-fuzz -runs=12000 -max_len=3500 \
+            -timeout=3 -print_final_stats=1
