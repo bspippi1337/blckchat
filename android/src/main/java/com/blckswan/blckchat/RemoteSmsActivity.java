@@ -39,6 +39,7 @@ public final class RemoteSmsActivity extends Activity {
     private int accent;
     private SmsE2ee crypto;
     private SmsFrameInbox inbox;
+    private SmsDraftStore drafts;
     private LinearLayout body;
     private EditText phone,peerCode,outgoing,incoming;
     private TextView status,fingerprint,decrypted;
@@ -113,6 +114,7 @@ public final class RemoteSmsActivity extends Activity {
         try{
             crypto=new SmsE2ee(this);
             inbox=new SmsFrameInbox(this);
+            drafts=new SmsDraftStore(this);
         }catch(Exception ex){
             showUnsupported(ex);return;
         }
@@ -195,6 +197,11 @@ public final class RemoteSmsActivity extends Activity {
         outgoing=input("MELDING","Skriv en kort melding…",true);
         gap(action("SEND KRYPTERT SMS",true,v->sendEncrypted()),12);
         sendButton=(TextView)body.getChildAt(body.getChildCount()-1);
+        gap(action("GJENÅPNE SISTE KRYPTERTE SMS",false,v->retryDraft()),8);
+        gap(action("BEKREFT SENDT / TØM UTKAST",false,v->confirmDraft()),8);
+        paragraph("Et usendt kryptert utkast lagres lokalt og kan gjenåpnes "+
+            "etter omstart. Appen kan ikke vite om du trykket Send i SMS-appen. "+
+            "Bekreft sending manuelt før du lager neste melding.",10);
         paragraph("Telefonens vanlige SMS-app åpnes med bare kryptert tekst. "
             +"Du kontrollerer kostnadene og trykker Send selv. Lange meldinger "
             +"kan koste flere SMS-er.",10);
@@ -254,6 +261,7 @@ public final class RemoteSmsActivity extends Activity {
             "Mottaker registrert: "+(crypto!=null&&crypto.hasPeer()?"Ja":"Nei")+"\\n"+
             "Sikkerhetskode bekreftet: "+(crypto!=null&&crypto.verified()?"Ja":"Nei")+"\\n"+
             "Uferdige krypterte meldinger: "+(inbox!=null?inbox.pendingCount():0)+"\\n"+
+            "Uavklart kryptert utkast: "+(drafts!=null&&drafts.pending()!=null?"Ja":"Nei")+"\\n"+
             "Kjøring: eksperimentell SMS-alpha, ikke sikkerhetsrevidert";
         android.content.ClipboardManager manager=
             (android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
@@ -317,8 +325,14 @@ public final class RemoteSmsActivity extends Activity {
     }
     private void sendEncrypted(){
         try{
+            phone(); // validate before encrypting or persisting anything
             String plain=outgoing.getText().toString().trim();
+            if(drafts.pending()!=null)
+                throw new IllegalStateException(
+                    "Bekreft forrige SMS som sendt, eller gjenåpne utkastet.");
             String wire=crypto.encrypt(plain);
+            drafts.remember(wire);
+            outgoing.setText("");
             int frames=wire.split("\\n").length;
             new AlertDialog.Builder(this).setTitle("Kryptert SMS")
                 .setMessage("Meldingen er kryptert på telefonen. "
@@ -329,11 +343,54 @@ public final class RemoteSmsActivity extends Activity {
                     try{composeSms(wire);
                         status("Kryptert tekst overført til SMS-appen. "
                           +"Sending er ikke bekreftet.");
-                        outgoing.setText("");
                     }catch(Exception ex){showFailure(ex);}
                 }).show();
         }catch(Exception ex){showFailure(ex);}
     }
+    private void retryDraft(){
+        try {
+            String wire=drafts.pending();
+            if(wire==null) {
+                status("Ingen kryptert SMS ligger klar til å sendes på nytt.");
+                return;
+            }
+            phone();
+            new AlertDialog.Builder(this)
+                .setTitle("Åpne forrige krypterte SMS?")
+                .setMessage("Dette er nøyaktig samme krypterte melding og samme "+
+                    "meldings-ID. Hvis den allerede ble sendt, kan ny sending "+
+                    "koste penger. Mottakeren avviser duplikater.")
+                .setNegativeButton("Avbryt",null)
+                .setPositiveButton("Åpne SMS-app",(dialog,which)->{
+                    try {
+                        composeSms(wire);
+                        status("Lagret kryptert SMS åpnet i meldingsappen.");
+                    }catch(Exception e){showFailure(e);}
+                }).show();
+        }catch(Exception e){showFailure(e);}
+    }
+
+    private void confirmDraft(){
+        try {
+            if(drafts.pending()==null) {
+                status("Ingen uavklart kryptert SMS å tømme.");
+                return;
+            }
+            new AlertDialog.Builder(this)
+                .setTitle("Er den krypterte SMS-en sendt?")
+                .setMessage("Appen kan ikke kontrollere om SMS-appen faktisk "+
+                    "sendte meldingen. Velg Bekreft bare hvis du har sjekket "+
+                    "at du trykket Send, eller bevisst vil forkaste utkastet.")
+                .setNegativeButton("Behold utkast",null)
+                .setPositiveButton("Bekreft / forkast",(dialog,which)->{
+                    try {
+                        drafts.clear();
+                        status("Kryptert SMS-utkast er fjernet.");
+                    }catch(Exception ex){showFailure(ex);}
+                }).show();
+        }catch(Exception e){showFailure(e);}
+    }
+
     private void decrypt(){
         try{
             String text=incoming.getText().toString().trim();
@@ -370,7 +427,7 @@ public final class RemoteSmsActivity extends Activity {
                 +"og sammenligne sikkerhetskoden på nytt. Lokal egen nøkkel beholdes.")
             .setNegativeButton("Avbryt",null)
             .setPositiveButton("Fjern paring",(d,w)->{
-                try{crypto.forgetPeer();inbox.clear();peerCode.setText("");
+                try{crypto.forgetPeer();inbox.clear();drafts.clear();peerCode.setText("");
                     decrypted.setText("Ingen melding dekryptert.");
                     updatePairing();status("Paring fjernet.");
                 }catch(Exception e){showFailure(e);}
