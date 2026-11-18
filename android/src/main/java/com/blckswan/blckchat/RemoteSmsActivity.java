@@ -197,11 +197,12 @@ public final class RemoteSmsActivity extends Activity {
         outgoing=input("MELDING","Skriv en kort melding…",true);
         gap(action("SEND KRYPTERT SMS",true,v->sendEncrypted()),12);
         sendButton=(TextView)body.getChildAt(body.getChildCount()-1);
-        gap(action("GJENÅPNE SISTE KRYPTERTE SMS",false,v->retryDraft()),8);
-        gap(action("BEKREFT SENDT / TØM UTKAST",false,v->confirmDraft()),8);
-        paragraph("Et usendt kryptert utkast lagres lokalt og kan gjenåpnes "+
-            "etter omstart. Appen kan ikke vite om du trykket Send i SMS-appen. "+
-            "Bekreft sending manuelt før du lager neste melding.",10);
+        gap(action("ÅPNE UTSENDING / NESTE SMS-DEL",false,v->retryDraft()),8);
+        gap(action("BEKREFT DENNE SMS-DELEN",false,v->confirmDraft()),8);
+        gap(action("FORKAST UTSENDING",false,v->discardDraft()),8);
+        paragraph("BLCKCHAT åpner én kryptert SMS-del om gangen. Bekreft manuelt "+
+            "at akkurat den delen ble sendt før neste åpnes. Fremdriften "+
+            "lagres også når appen starter på nytt.",10);
         paragraph("Telefonens vanlige SMS-app åpnes med bare kryptert tekst. "
             +"Du kontrollerer kostnadene og trykker Send selv. Lange meldinger "
             +"kan koste flere SMS-er.",10);
@@ -325,70 +326,95 @@ public final class RemoteSmsActivity extends Activity {
     }
     private void sendEncrypted(){
         try{
-            phone(); // validate before encrypting or persisting anything
-            String plain=outgoing.getText().toString().trim();
+            phone(); // Validate destination before storing an encrypted draft.
             if(drafts.pending()!=null)
                 throw new IllegalStateException(
-                    "Bekreft forrige SMS som sendt, eller gjenåpne utkastet.");
+                    "Først må du fullføre eller forkaste tidligere kryptert SMS.");
+            String plain=outgoing.getText().toString().trim();
             String wire=crypto.encrypt(plain);
             drafts.remember(wire);
             outgoing.setText("");
-            int frames=wire.split("\\n").length;
-            new AlertDialog.Builder(this).setTitle("Kryptert SMS")
-                .setMessage("Meldingen er kryptert på telefonen. "
-                  +"Den inneholder "+frames+" transportdel(er), og mobiloperatøren kan "
-                  +"ta betalt for flere SMS-er. Vil du åpne SMS-appen?")
-                .setNegativeButton("Avbryt",null)
-                .setPositiveButton("Åpne SMS-app",(d,w)->{
-                    try{composeSms(wire);
-                        status("Kryptert tekst overført til SMS-appen. "
-                          +"Sending er ikke bekreftet.");
+            showCurrentPart();
+        }catch(Exception ex){showFailure(ex);}
+    }
+
+    private void showCurrentPart(){
+        try{
+            String part=drafts.currentPart();
+            if(part==null){
+                status("Ingen uavklart kryptert SMS ligger i utboksen.");
+                return;
+            }
+            phone();
+            int current=drafts.currentPartIndex()+1;
+            int total=drafts.partCount();
+            if(part.length()>153)
+                throw new SecurityException("SMS-rammen er for lang");
+            new AlertDialog.Builder(this).setTitle("Kryptert SMS · del "+current+"/"+total)
+                .setMessage("Nå åpner vi nøyaktig ÉN SMS-del (maks 153 tegn). "+
+                    "Kontroller mottakeren og trykk Send i SMS-appen. "+
+                    "Kom så tilbake og trykk «BEKREFT DENNE SMS-DELEN» "+
+                    "for å gå videre. Hver del kan koste én SMS.")
+                .setNegativeButton("Senere",null)
+                .setPositiveButton("Åpne SMS-appen",(dialog,which)->{
+                    try {
+                        composeSms(part);
+                        status("Kryptert del "+current+" av "+total+
+                            " ligger i SMS-appen. Sending ikke bekreftet.");
                     }catch(Exception ex){showFailure(ex);}
                 }).show();
         }catch(Exception ex){showFailure(ex);}
     }
+
     private void retryDraft(){
-        try {
-            String wire=drafts.pending();
-            if(wire==null) {
-                status("Ingen kryptert SMS ligger klar til å sendes på nytt.");
-                return;
-            }
-            phone();
-            new AlertDialog.Builder(this)
-                .setTitle("Åpne forrige krypterte SMS?")
-                .setMessage("Dette er nøyaktig samme krypterte melding og samme "+
-                    "meldings-ID. Hvis den allerede ble sendt, kan ny sending "+
-                    "koste penger. Mottakeren avviser duplikater.")
-                .setNegativeButton("Avbryt",null)
-                .setPositiveButton("Åpne SMS-app",(dialog,which)->{
-                    try {
-                        composeSms(wire);
-                        status("Lagret kryptert SMS åpnet i meldingsappen.");
-                    }catch(Exception e){showFailure(e);}
-                }).show();
-        }catch(Exception e){showFailure(e);}
+        showCurrentPart();
     }
 
     private void confirmDraft(){
-        try {
-            if(drafts.pending()==null) {
-                status("Ingen uavklart kryptert SMS å tømme.");
+        try{
+            if(drafts.pending()==null){
+                status("Ingen uavklart kryptert SMS-del å bekrefte.");
                 return;
             }
+            int current=drafts.currentPartIndex()+1;
+            int total=drafts.partCount();
             new AlertDialog.Builder(this)
-                .setTitle("Er den krypterte SMS-en sendt?")
-                .setMessage("Appen kan ikke kontrollere om SMS-appen faktisk "+
-                    "sendte meldingen. Velg Bekreft bare hvis du har sjekket "+
-                    "at du trykket Send, eller bevisst vil forkaste utkastet.")
-                .setNegativeButton("Behold utkast",null)
-                .setPositiveButton("Bekreft / forkast",(dialog,which)->{
+                .setTitle("Er del "+current+" av "+total+" sendt?")
+                .setMessage("Bekreft KUN når du har sett at du trykket "+
+                    "Send for akkurat denne delen i SMS-appen. "+
+                    "BLCKCHAT kan ikke se operatørens sendestatus.")
+                .setNegativeButton("Ikke ennå",null)
+                .setPositiveButton("Ja, sendt",(dialog,which)->{
                     try {
-                        drafts.clear();
-                        status("Kryptert SMS-utkast er fjernet.");
+                        boolean finished=drafts.confirmCurrentPart();
+                        if(finished)
+                            status("Alle "+total+" SMS-deler er manuelt bekreftet "+
+                                "sendt. Levering til mottakeren er ikke verifisert.");
+                        else
+                            showCurrentPart();
                     }catch(Exception ex){showFailure(ex);}
                 }).show();
-        }catch(Exception e){showFailure(e);}
+        }catch(Exception ex){showFailure(ex);}
+    }
+
+    private void discardDraft(){
+        try{
+            if(drafts.pending()==null){
+                status("Ingen kryptert SMS å forkaste.");
+                return;
+            }
+            new AlertDialog.Builder(this).setTitle("Forkaste kryptert SMS?")
+                .setMessage("Utboksen slettes, selv om enkelte SMS-deler "+
+                    "allerede kan være sendt. Ikke bruk denne funksjonen "+
+                    "for å bekrefte sending.")
+                .setNegativeButton("Behold",null)
+                .setPositiveButton("Forkast utkast",(dialog,which)->{
+                    try{
+                        drafts.clear();
+                        status("Kryptert SMS-utkast forkastet.");
+                    }catch(Exception ex){showFailure(ex);}
+                }).show();
+        }catch(Exception ex){showFailure(ex);}
     }
 
     private void decrypt(){
