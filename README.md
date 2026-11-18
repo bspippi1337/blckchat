@@ -32,6 +32,14 @@ segments are reassembled in any order with a bounded persistent cache.
 Authenticated replay IDs are stored in SQLite across restarts, and a
 change in Android Keystore identity invalidates old peer verification.
 A local Keystore self-test and anonymized diagnostics are available.
+
+A local encrypted conversation journal now stores up to 300 recent
+outgoing prepared messages and authenticated incoming texts under a
+**different non-exportable Android Keystore AES-GCM key**. SQLite holds
+ciphertext, IVs and opaque record IDs, never message plaintext. History
+is scoped to the verified public-key identity, can be deleted from the app,
+and is removed when the peer pairing is reset. Successful local journaling
+does not prove SMS delivery or provide forward secrecy.
 These improvements are exercised by JVM and Android-emulator tests, but
 do not establish operator-to-operator delivery or full forward secrecy.
 
