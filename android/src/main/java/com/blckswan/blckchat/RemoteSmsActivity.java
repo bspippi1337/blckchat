@@ -261,9 +261,11 @@ public final class RemoteSmsActivity extends Activity {
         Intent sms=new Intent(Intent.ACTION_SENDTO);
         sms.setData(Uri.parse("smsto:"+Uri.encode(phone())));
         sms.putExtra("sms_body",message);
-        if(sms.resolveActivity(getPackageManager())==null)
-            throw new IllegalStateException("Ingen SMS-app er tilgjengelig");
-        startActivity(sms);
+        try {
+            startActivity(sms);
+        }catch(android.content.ActivityNotFoundException ex){
+            throw new IllegalStateException("Ingen SMS-app er tilgjengelig",ex);
+        }
     }
     private void sendKey(){
         try{
