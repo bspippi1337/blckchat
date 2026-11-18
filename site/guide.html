@@ -1,41 +1,36 @@
-<!doctype html>
-<html lang="no"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html><html lang="no"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090e15">
 <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
-<title>Enkel bruksanvisning · BLCKCHAT 42</title></head>
-<body><header class="nav shell"><a class="identity" href="./"><img src="icon.svg" width="34" height="34" alt="">BLCK/CHAT <sup>42</sup></a>
-<nav aria-label="Meny"><a href="./">Hjem</a><a href="join.html">Installer</a><a href="security.html">Sikkerhet</a></nav></header>
+<title>BLCKCHAT SMS-test · Enkel bruksanvisning</title></head>
+<body><header class="nav shell">
+<a class="identity" href="./"><img src="icon.svg" width="34" height="34" alt="">BLCK/CHAT <sup>42</sup></a>
+<nav aria-label="Meny"><a href="./">Hjem</a><a href="join.html">Last ned</a><a href="security.html">Sikkerhet</a></nav></header>
 <main class="doc shell">
-<p class="kicker">ENKEL BRUKSANVISNING / ANDROID</p>
-<h1>Én app. Tre telefoner. En samtale.</h1>
-<p>BLCKCHAT er laget for at du skal slippe å forstå teknikken som ligger bak. Phone A (Admin) oppretter rommet. Phone B og Phone C får SMS. Så skriver dere til hverandre.</p>
-<p class="notice"><strong>Intern testutgave:</strong> Mobilene må bruke samme Wi-Fi eller Pippis hotspot. Hold appen åpen på Pippis telefon. Dette er ikke ennå en ferdig sikker messenger for privat eller sensitiv kommunikasjon.</p>
-<h2>For Phone B og Phone C</h2>
-<ol>
-<li><strong>Trykk lenken i SMS-en fra Phone A (Admin).</strong> Da åpnes en nettside med en knapp for å laste ned Android-appen.</li>
-<li><strong>Trykk «Last ned Android-appen».</strong> Når filen er lastet ned, åpner du den og velger «Installer». Android kan be om tillatelse til installasjon fra nettleseren fordi vi tester utenom Play Butikk.</li>
-<li><strong>Åpne den samme SMS-lenken på nytt.</strong> Trykk «Åpne BLCKCHAT og bli med» på nettsiden.</li>
-<li><strong>Velg navn.</strong> Phone B skriver «Phone B», Phone C skriver «Phone C». Trykk «JOIN THIS ROOM».</li>
-<li><strong>Skriv din første melding.</strong> Hvis Phone A (Admin) svarer, fungerer samtalen.</li>
-</ol>
-<p>Du trenger ikke GitHub, BankID, noe passord eller å skrive inn en serveradresse selv.</p>
-<p><a class="button primary" href="join.html">Gå til installasjonssiden</a></p>
-<h2>For Phone A (Admin) (administrator)</h2>
-<ol>
-<li>Installer samme APK, åpne appen og bruk navnet «Phone A (Admin)».</li>
-<li>Trykk «OPEN A ROOM · ADMIN». Appen starter en lokal meldingsserver på din telefon.</li>
-<li>Sjekk at telefonen viser tilkobling og en lokal Wi-Fi-adresse.</li>
-<li>Skriv Tronds mobilnummer med landskode, for eksempel <code>+47...</code>, og trykk «CREATE INVITE &amp; OPEN SMS». Kontroller og send SMS-en fra telefonens vanlige SMS-app.</li>
-<li>Gjenta for Phone C. Hver mottaker får sin egen invitasjonslenke som bare kan brukes én gang.</li>
-<li>Hold rommet åpent og telefonen våken så lenge gruppen tester.</li>
-</ol>
-<h2>Hvis det stopper opp</h2>
-<p><strong>«Invitasjon utløpt»:</strong> Send en ny SMS fra Pippis telefon. Testinvitasjoner varer i omtrent 10 minutter. Du trenger ikke laste ned APK-en på nytt.</p>
-<p><strong>«Connection failed»:</strong> Kontroller at begge telefonene bruker samme Wi-Fi eller hotspot. Prøv en ny invitasjon mens Pippis app er åpen.</p>
-<p><strong>Android advarer om installasjon:</strong> Det er normalt å få en tillatelsesdialog for apper utenfor Play Butikk. Kontroller at lenken er <code>bspippi1337.github.io/blckchat/</code>. Hvis Android uttrykkelig advarer om skadevare, stopp og gi beskjed. Ikke slå av Play Protect.</p>
-<p><strong>Du ser ingen tidligere meldinger:</strong> Testutgaven lagrer bare de siste meldingene i minnet på Pippis telefon. Dette blir forbedret.</p>
-<p><strong>iPhone:</strong> APK-en kan ikke installeres på iOS. iPhone-klienten er fortsatt under arbeid.</p>
-<h2>Hva tester vi?</h2>
-<p>Tre telefoner sender og mottar virkelige tekstmeldinger via et lokalt Wi-Fi-nett. Dette er den første nettverksutgaven. Synkronisering via GitHub, persistens og sikkerhetsrevidert ende-til-ende-kryptering kommer i senere utgaver.</p>
-<p class="fine"><a href="https://github.com/bspippi1337/blckchat">Kildekode</a> · <a href="security.html">Sikkerhet</a> · <a href="downloads/SHA256SUMS.txt">Filens kontrollsum</a></p>
+<p class="kicker">BRUKSANVISNING / REMOTE SMS ALPHA</p>
+<h1>To telefoner. To steder. Samme samtale.</h1>
+<p>Dette er testutgaven for <strong>Phone A (Admin)</strong> og <strong>Phone B</strong>. Den bruker vanlige SMS-er og krever ikke at telefonene er på samme Wi-Fi. Begge må ha Android 12 eller nyere.</p>
+<p class="notice"><strong>Før dere starter:</strong> Dette er en eksperimentell, ennå ikke sikkerhetsrevidert krypteringsløsning. Ikke bruk den til sensitive meldinger. Telefonnumre og tidspunkt skjules ikke for mobiloperatøren. Telefonenes offentlige nøkler må verifiseres ved å sammenligne sikkerhetskoden via en uavhengig telefonsamtale.</p>
+<h2>1. Begge installerer appen</h2>
+<p>Åpne <a href="join.html">nedlastingssiden</a> på hver Android-telefon, trykk «Last ned BLCKCHAT SMS-test» og installer. Godta bare nødvendig installasjonstillatelse for denne offisielle lenken. Ikke slå av Play Protect. Start BLCKCHAT.</p>
+<h2>2. Phone A sender sin offentlige nøkkel</h2>
+<p>Skriv mobilnummeret til Phone B med landskode (for eksempel <code>+47…</code>). Trykk «SEND MIN OFFENTLIGE NØKKEL VIA SMS». Den vanlige SMS-appen åpnes med en <code>BC42K|1|…</code>-kode. Se over og trykk Send.</p>
+<h2>3. Phone B svarer med sin nøkkel</h2>
+<p>Phone B kopierer hele <code>BC42K|1|…</code>-koden fra SMS-en, limer den inn i feltet for mottakerens nøkkel og trykker «IMPORTER OFFENTLIG NØKKEL». Deretter sender Phone B sin egen offentlige nøkkel fra samme knapp tilbake til Phone A. Phone A importerer koden på samme måte.</p>
+<p>Hvis SMS-appen kan dele tekst, kan dere også bruke «Del» → BLCKCHAT. Appen fyller inn nøkkelkoden for kontroll. Den importeres ikke automatisk.</p>
+<h2>4. Bekreft sikkerhetskoden</h2>
+<p>Begge telefonene viser nå en sikkerhetskode. Ring hverandre via en kanal dere stoler på og sammenlign koden tegn for tegn. <strong>Hvis de ikke er identiske, stopp.</strong> Ikke kryss av for bekreftelse før de faktisk stemmer. Trykk deretter «Jeg har sammenlignet og bekreftet koden» på begge telefonene.</p>
+<h2>5. Send og les første krypterte melding</h2>
+<p>Phone A skriver for eksempel «Testmelding 42». Trykk «SEND KRYPTERT SMS». Appen viser en bekreftelse om eventuelle SMS-deler og åpner den vanlige SMS-appen med <em>kryptert</em> tekst. Trykk Send der.</p>
+<p>Phone B åpner meldingen i sin SMS-app, kopierer hele teksten som begynner med <code>BC42|1|…</code>, limer den inn i BLCKCHAT og trykker «DEKRYPTER MOTTATT MELDING». Hvis den er komplett og autentisk, vises meldingen. Gjenta andre veien.</p>
+<h2>Om noe ikke virker</h2>
+<p><strong>«Kunne ikke starte kryptering»:</strong> Android 12 eller nyere og en fungerende Android Keystore ECDH-leverandør er nødvendig. Det finnes ingen usikker fallback.</p>
+<p><strong>«En annen mottaker er allerede paret»:</strong> Bare én verifisert kontakt støttes i denne første testen. Bruk «FJERN PARING» hvis du bevisst vil bytte kontakt. Det krever ny sikkerhetskontroll.</p>
+<p><strong>«Meldingen er ufullstendig eller skadet»:</strong> Kopier hele den krypterte SMS-en. Lange meldinger kan bestå av flere deler. Operatøren kan ta betalt for mer enn én SMS.</p>
+<p><strong>«Meldingen er allerede lest»:</strong> Samme krypterte meldings-ID avvises ved nytt forsøk. Dette er med vilje.</p>
+<p><strong>Ingen SMS-app åpnes:</strong> Sjekk at telefonen har en aktiv SIM/eSIM og en standard SMS-app.</p>
+<p><strong>Kan Phone C delta?</strong> Ikke som en sikker gruppesamtale i denne utgaven. Flerpartsnøkler og sikker inn- og utmelding er neste milepæl.</p>
+<h2>Dette beskytter testutgaven mot</h2>
+<p>Den krypterer meldingsinnhold før det når SMS-operatøren, binder begge enheters nøkler til krypteringen og kontrollerer meldingens integritet. Den har ikke Double Ratchet, garantert fremtidig hemmelighold ved nøkkeltyveri, automatisk SMS-mottak eller en uavhengig sikkerhetsrevisjon.</p>
+<p class="fine"><a href="https://github.com/bspippi1337/blckchat">Kildekode</a> · <a href="security.html">Sikkerhetsstatus</a> · <a href="downloads/SHA256SUMS.txt">SHA-256</a></p>
 </main></body></html>
