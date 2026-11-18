@@ -15,6 +15,16 @@ A minimal GitHub-backed group messenger, written primarily in ISO C11.
 
 **A gateway is necessary.** GitHub cannot safely accept anonymous guest messages directly to a private repository. A small C11 gateway authenticates guest sessions, stores the administrator's GitHub credential outside the repository, validates permissions and acts as the only GitHub API writer/reader. GitHub Actions and Pages are *not* a substitute for an always-available private gateway.
 
+## Android LAN Alpha: real test messages
+
+**Download for Pippi, Trond and Thomas:** [Simple Android installation page](https://bspippi1337.github.io/blckchat/join.html). The [direct test APK](https://bspippi1337.github.io/blckchat/downloads/blckchat-lan-alpha.apk) is built, verified and published by the Pages workflow, while GitHub Actions also retains its own internal artifact.
+
+This is **not the promised production GitHub-backed Alpha 1**. It is an internal, openly accessible testing build with real text messages over the same local Wi-Fi. The administrator's Android runs the TCP room server and sends one-use invitation links using the native SMS compose app. Guest Android screens only ask for a name and one tap to join. Messages are encrypted in transit via platform AES-GCM, but the host can read them; there is no audited E2EE, no persistent history, no remote cross-network delivery and no private GitHub synchronization yet.
+
+**Never use this build for sensitive messages.** Android debug signing and an external APK install can trigger normal Android installation warnings. Do not disable Play Protect or ignore malware warnings.
+
+[Plain-Norwegian onboarding guide](https://bspippi1337.github.io/blckchat/guide.html) · [Three-phone manual](docs/ANDROID_LAN_TEST.md) · [Security boundaries](SECURITY.md)
+
 ## Release policy: first APK must actually message
 
 **No demo-only APK release.** An Android artifact must not be named or advertised as the first release unless it passes end-to-end integration tests with the actual HTTPS gateway, a private GitHub-backed room and two independently authenticated guests.
@@ -47,7 +57,7 @@ The formatting module and Android adapter are present, with native C11 formatter
 
 ## State
 
-**Alpha foundation, not yet an app.** Local CLI journal, C11 GUI scene prototype, SMS formatter, deny-by-default role policy, and a tested RAM-only three-person room engine with one-time OTPs and revocation. No deployed GitHub gateway, automatic SMS queue, durable messaging, native mobile clients or end-to-end encryption yet. Do not use for sensitive conversations. GitHub transport is eventual-consistency, not real-time. See [SECURITY.md](SECURITY.md).
+**Alpha foundation and internal Android LAN app.** A signed debug Android APK now supports a real same-Wi-Fi test conversation and one-use SMS invitations. Local CLI journal, C11 GUI scene prototype, SMS formatter, deny-by-default role policy and a tested RAM-only three-person room engine are present. No deployed production GitHub gateway, automatic SMS queue, durable cloud messaging, iOS client or end-to-end encryption yet. Do not use for sensitive conversations. GitHub transport is eventual-consistency, not real-time. See [SECURITY.md](SECURITY.md).
 
 ## Build and local smoke test
 
