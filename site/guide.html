@@ -12,6 +12,7 @@
 <p>Dette er testutgaven for <strong>Phone A (Admin)</strong> og <strong>Phone B</strong>. Den bruker vanlige SMS-er og krever ikke at telefonene er på samme Wi-Fi. Begge må ha Android 12 eller nyere.</p>
 <p class="notice"><strong>Før dere starter:</strong> Dette er en eksperimentell, ennå ikke sikkerhetsrevidert krypteringsløsning. Ikke bruk den til sensitive meldinger. Telefonnumre og tidspunkt skjules ikke for mobiloperatøren. Telefonenes offentlige nøkler må verifiseres ved å sammenligne sikkerhetskoden via en uavhengig telefonsamtale.</p>
 <h2>1. Begge installerer appen</h2>
+<p>Etter installasjonen kan dere trykke «KJØR KRYPTO-SELVTEST PÅ DENNE TELEFONEN». Den kontrollerer at Android Keystore, nøkkelutveksling og krypteringen faktisk fungerer lokalt. En bestått selvtest erstatter ikke nøkkelverifisering med den andre personen.</p>
 <p>Åpne <a href="join.html">nedlastingssiden</a> på hver Android-telefon, trykk «Last ned BLCKCHAT SMS-test» og installer. Godta bare nødvendig installasjonstillatelse for denne offisielle lenken. Ikke slå av Play Protect. Start BLCKCHAT.</p>
 <h2>2. Phone A sender invitasjon</h2>
 <p>Skriv mobilnummeret til Phone B med landskode (for eksempel <code>+47…</code>). Trykk «SEND MIN OFFENTLIGE NØKKEL VIA SMS». SMS-appen åpnes med en invitasjonslenke. Trykk Send.</p>
@@ -27,8 +28,9 @@
 <h2>Om noe ikke virker</h2><p><strong>Android nekter å oppdatere APK-en:</strong> Tidlige testbygg kan være signert med ulike utviklernøkler. Avinstaller den forrige testappen før du installerer den nye. Da må nøkkelparing og sikkerhetskontroll gjøres på nytt.</p>
 <p><strong>«Kunne ikke starte kryptering»:</strong> Android 12 eller nyere og en fungerende Android Keystore ECDH-leverandør er nødvendig. Det finnes ingen usikker fallback.</p>
 <p><strong>«En annen mottaker er allerede paret»:</strong> Bare én verifisert kontakt støttes i denne første testen. Bruk «FJERN PARING» hvis du bevisst vil bytte kontakt. Det krever ny sikkerhetskontroll.</p>
-<p><strong>«Meldingen er ufullstendig eller skadet»:</strong> Kopier hele den krypterte SMS-en. Lange meldinger kan bestå av flere deler. Operatøren kan ta betalt for mer enn én SMS.</p>
-<p><strong>«Meldingen er allerede lest»:</strong> Samme krypterte meldings-ID avvises ved nytt forsøk. Dette er med vilje.</p>
+<p><strong>«Melding mottatt, 1 av 3 deler»:</strong> Meldingen er ikke klar ennå. Hvis SMS-appen viser delene som separate meldinger, lim inn én komplett BC42-del av gangen. Appen husker krypterte deler også etter omstart, i opptil 48 timer. Hvis SMS-appen allerede har satt dem sammen, lim inn hele teksten.</p>
+<p><strong>«Meldingen er ufullstendig eller skadet»:</strong> En del kan mangle, ha blitt endret eller inneholde feil tegn. Kopier delene nøyaktig. Prøv «SLETT UFERDIGE SMS-DELER» hvis en feil del blokkerer ny import. Lange meldinger kan koste flere SMS-er.</p>
+<p><strong>«Meldingen er allerede lest»:</strong> Samme krypterte meldings-ID avvises ved nytt forsøk. Appen har et lokalt SQLite-register over tidligere autentiserte meldings-ID-er, uten å lagre klarteksten der.</p>
 <p><strong>Ingen SMS-app åpnes:</strong> Sjekk at telefonen har en aktiv SIM/eSIM og en standard SMS-app.</p>
 <p><strong>Kan Phone C delta?</strong> Ikke som en sikker gruppesamtale i denne utgaven. Flerpartsnøkler og sikker inn- og utmelding er neste milepæl.</p>
 <h2>Dette beskytter testutgaven mot</h2>
