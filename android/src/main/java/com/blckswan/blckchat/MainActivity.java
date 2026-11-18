@@ -203,7 +203,7 @@ public final class MainActivity extends Activity implements LanChat.Events {
                 "PhoneA har invitert deg til The Workshop. Skriv navnet ditt og trykk Bli med. Du trenger ingen konto.");
             nameField=field("HVA HETER DU?","PhoneB eller PhoneC","");
             addButton(button("BLI MED I SAMTALEN",accent,BG,v->startJoining()),24);
-            note("Begge telefonene må være på samme Wi-Fi eller Pippis hotspot. Invitasjonen kan bare brukes én gang, og varer i 10 minutter.",24);
+            note("Begge telefonene må være på samme Wi-Fi eller Phone A sin hotspot. Invitasjonen kan bare brukes én gang, og varer i 10 minutter.",24);
         } else {
             header("BLCKCHAT / INTERN ALFA","En samtale, uten omveier.",
                 "PhoneA åpner rommet. PhoneB og PhoneC kommer inn fra SMS-invitasjonen. Dette er en lokal test, ikke ferdig E2EE.");
@@ -266,7 +266,7 @@ public final class MainActivity extends Activity implements LanChat.Events {
 
     private void showChat(boolean hosting) {
         root(false);
-        header(hosting?"BLCKCHAT / PIPPI HOST":"BLCKCHAT / GUEST",
+        header(hosting?"BLCKCHAT / PHONE A HOST":"BLCKCHAT / GUEST",
             "The Workshop",hosting?"Encrypted Wi-Fi group · This phone is the room host"
                 :"Private Wi-Fi room · Not production E2EE");
         status=text("Connecting…",12,accent,false);
