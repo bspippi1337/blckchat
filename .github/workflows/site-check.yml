@@ -1,0 +1,49 @@
+name: Pages frontend quality gate
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - '.github/workflows/site-check.yml'
+  pull_request:
+    paths:
+      - 'site/**'
+      - '.github/workflows/site-check.yml'
+permissions:
+  contents: read
+concurrency:
+  group: site-check-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate frontend JavaScript syntax
+        run: |
+          set -euo pipefail
+          node --check site/site.js
+          node --check site/test.js
+      - name: Check public labels and internal test entrypoints
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path("site")
+          html={p.name:p.read_text(encoding="utf-8") for p in root.glob("*.html")}
+          assert {"index.html","join.html","guide.html","security.html","test.html"} <= set(html)
+          for page in ("index.html","join.html","guide.html"):
+              assert 'href="test.html"' in html[page], f"No test link in {page}"
+          assert html["test.html"].count('data-test-id="') == 9
+          assert 'src="test.js"' in html["test.html"]
+          assert "prefers-reduced-motion" in (root/"style.css").read_text(encoding="utf-8")
+          blocked=re.compile(r"\b(pippi|trond|thomas)\b",re.I)
+          for name,body in html.items():
+              assert not blocked.search(body), f"Public page {name} exposes a tester name"
+          js=(root/"test.js").read_text(encoding="utf-8")
+          assert not re.search(r"\b(fetch|XMLHttpRequest|sendBeacon)\s*\(",js), "Test page must be local-only"
+          print("PASS: 9 checks, public anonymity, source links and local-only test state")
+          PY
+      - name: Reject whitespace errors
+        run: git diff --check HEAD~1 HEAD
