@@ -192,6 +192,94 @@ public final class SmsAndroidInstrumentedTest {
         restored.close();
     }
 
+    @Test public void fullAndroidPhoneAAndSimulatedPhoneBExchange()
+        throws Exception {
+        Context context=InstrumentationRegistry.getInstrumentation().getTargetContext();
+        SmsE2ee phoneA=new SmsE2ee(context);
+        phoneA.forgetPeer();
+        try {
+            // Phone B runs in the test only, with a distinct ephemeral key.
+            java.security.KeyPairGenerator keys=
+                java.security.KeyPairGenerator.getInstance("EC");
+            keys.initialize(new java.security.spec.ECGenParameterSpec("secp256r1"));
+            java.security.KeyPair phoneB=keys.generateKeyPair();
+            byte[] publicB=phoneB.getPublic().getEncoded();
+            String pairing=phoneA.myPairingCode();
+            assertTrue(pairing.startsWith("BC42K|1|"));
+            byte[] publicA=android.util.Base64.decode(
+                pairing.substring("BC42K|1|".length()),
+                android.util.Base64.URL_SAFE|android.util.Base64.NO_WRAP|
+                android.util.Base64.NO_PADDING);
+            java.security.PublicKey keyA=java.security.KeyFactory
+                .getInstance("EC").generatePublic(
+                    new java.security.spec.X509EncodedKeySpec(publicA));
+            phoneA.importPairingCode("BC42K|1|"+SmsE2ee.encode(publicB));
+            assertEquals(
+                SmsCryptoPrimitives.safetyCode(publicB,publicA),
+                phoneA.safetyCode());
+            phoneA.setVerified(true);
+
+            javax.crypto.KeyAgreement agreement=
+                javax.crypto.KeyAgreement.getInstance("ECDH");
+            agreement.init(phoneB.getPrivate());
+            agreement.doPhase(keyA,true);
+            byte[] secret=agreement.generateSecret();
+
+            // A -> B through the actual app encryption and C11 SMS frames.
+            String outbound=phoneA.encrypt("Phone A -> Phone B over SMS");
+            String outgoingId=outbound.substring(7,39);
+            byte[] encrypted=NativeSmsCodec.unpack(outbound);
+            assertNotNull(encrypted);
+            byte[] fromA=SmsCryptoPrimitives.directionKey(secret,
+                publicB,publicA,publicA);
+            javax.crypto.Cipher open=javax.crypto.Cipher.getInstance("AES/GCM/NoPadding");
+            open.init(javax.crypto.Cipher.DECRYPT_MODE,
+                new javax.crypto.spec.SecretKeySpec(fromA,"AES"),
+                new javax.crypto.spec.GCMParameterSpec(128,
+                    Arrays.copyOfRange(encrypted,0,12)));
+            open.updateAAD(SmsCryptoPrimitives.associatedData(
+                publicB,publicA,outgoingId));
+            String bReads=new String(
+                open.doFinal(encrypted,12,encrypted.length-12),
+                java.nio.charset.StandardCharsets.UTF_8);
+            assertEquals("Phone A -> Phone B over SMS",bReads);
+
+            // B -> A encrypted using independent JCA implementation,
+            // then reassembled by C11 and decrypted by the real Android app.
+            byte[] fromB=SmsCryptoPrimitives.directionKey(secret,
+                publicB,publicA,publicB);
+            String id=java.util.UUID.randomUUID().toString()
+                .replace("-","").toLowerCase(java.util.Locale.ROOT);
+            byte[] nonce=new byte[12];
+            new java.security.SecureRandom().nextBytes(nonce);
+            javax.crypto.Cipher seal=javax.crypto.Cipher.getInstance("AES/GCM/NoPadding");
+            seal.init(javax.crypto.Cipher.ENCRYPT_MODE,
+                new javax.crypto.spec.SecretKeySpec(fromB,"AES"),
+                new javax.crypto.spec.GCMParameterSpec(128,nonce));
+            seal.updateAAD(SmsCryptoPrimitives.associatedData(
+                publicB,publicA,id));
+            byte[] text="Phone B -> Phone A: verified ciphertext"
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            byte[] body=seal.doFinal(text);
+            byte[] sealed=new byte[nonce.length+body.length];
+            System.arraycopy(nonce,0,sealed,0,nonce.length);
+            System.arraycopy(body,0,sealed,nonce.length,body.length);
+            String wire=NativeSmsCodec.pack(sealed,id);
+            assertNotNull(wire);
+            assertEquals("Phone B -> Phone A: verified ciphertext",
+                phoneA.decrypt(wire));
+            boolean replayDenied=false;
+            try{phoneA.decrypt(wire);}
+            catch(SecurityException expected){replayDenied=true;}
+            assertTrue("A correctly authenticated SMS cannot be replayed",replayDenied);
+            Arrays.fill(secret,(byte)0);
+            Arrays.fill(fromA,(byte)0);
+            Arrays.fill(fromB,(byte)0);
+        }finally {
+            phoneA.forgetPeer();
+        }
+    }
+
     @Test public void appDoesNotRequestSmsOrInternetPermissions() throws Exception {
         Context context=InstrumentationRegistry.getInstrumentation().getTargetContext();
         PackageInfo info=context.getPackageManager().getPackageInfo(
