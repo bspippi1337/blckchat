@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" rx="20" fill="#101e29"/><rect x="13" y="16" width="54" height="47" rx="13" fill="#70edd1"/><path d="M29 63l-2 10 15-10" fill="#70edd1"/><text x="40" y="48" font-family="system-ui,sans-serif" font-weight="900" font-size="27" text-anchor="middle" fill="#11272a">B</text><circle cx="58" cy="25" r="5" fill="#10242d"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108" role="img" aria-label="BLCKCHAT C with subtle fedora">
+  <rect width="108" height="108" rx="23" fill="#08121b"/>
+  <path d="M75 40 C68 30 56 28 46 33 C33 39 28 50 31 63 C34 76 45 82 56 80 C65 79 72 75 77 68" fill="none" stroke="#f1f6f5" stroke-width="12" stroke-linecap="round"/>
+  <path d="M27 42 Q52 29 80 41" fill="none" stroke="#80a9b6" stroke-width="2.2" stroke-linecap="round" opacity=".48"/>
+  <path d="M39 38 L44 25 Q46 21 51 24 L58 22 Q62 21 65 26 L71 39" fill="none" stroke="#80a9b6" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity=".42"/>
+  <path d="M43 84 H65" fill="none" stroke="#10d9d6" stroke-width="2" stroke-linecap="round" opacity=".58"/>
+</svg>
