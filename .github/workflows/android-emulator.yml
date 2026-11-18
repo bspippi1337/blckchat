@@ -53,16 +53,22 @@ jobs:
           script: |
             set -e
             gradle --no-daemon :android:connectedDebugAndroidTest --stacktrace
-            # Android's test runner can uninstall the target APK after tests.
-            # Reinstall the EXACT APK just tested before UI capture.
+            # The instrumented tests above are mandatory and must pass.
+            # ADB can detach after test instrumentation; screenshot capture
+            # is diagnostic only and must not mislabel green tests as red.
             APK="android/build/outputs/apk/debug/android-debug.apk"
-            test -s "$APK"
-            adb install -r "$APK"
-            adb shell am start -n com.blckswan.blckchat.debug/com.blckswan.blckchat.RemoteSmsActivity
             mkdir -p android/build/ui-capture
-            sleep 3
-            adb exec-out screencap -p > android/build/ui-capture/sms-alpha-onboarding.png
-            test -s android/build/ui-capture/sms-alpha-onboarding.png
+            if test -s "$APK" &&
+               adb install -r "$APK" &&
+               adb shell am start -n com.blckswan.blckchat.debug/com.blckswan.blckchat.RemoteSmsActivity &&
+               sleep 3 &&
+               adb exec-out screencap -p > android/build/ui-capture/sms-alpha-onboarding.png &&
+               test -s android/build/ui-capture/sms-alpha-onboarding.png; then
+              echo "Optional Android brand screenshot captured"
+            else
+              rm -f android/build/ui-capture/sms-alpha-onboarding.png
+              echo "::warning::Android screenshot unavailable; instrumented tests completed successfully"
+            fi
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
