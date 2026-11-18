@@ -337,20 +337,27 @@ public final class LanChat {
 
     public boolean isHosting() { return running; }
     public static String localIp() {
+        String wifi=null, fallback=null;
         try {
             Enumeration<NetworkInterface> interfaces=NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface network=interfaces.nextElement();
                 if (!network.isUp() || network.isLoopback() || network.isVirtual()) continue;
+                String name=network.getName();
                 Enumeration<InetAddress> addresses=network.getInetAddresses();
                 while (addresses.hasMoreElements()) {
                     InetAddress address=addresses.nextElement();
-                    if (address instanceof Inet4Address && address.isSiteLocalAddress())
-                        return address.getHostAddress();
+                    if (!(address instanceof Inet4Address) || !address.isSiteLocalAddress()) continue;
+                    String ip=address.getHostAddress();
+                    if (name!=null && (name.startsWith("ap") || name.startsWith("softap")))
+                        return ip; // Phone hotspot: prefer the IP guests can reach.
+                    if (name!=null && (name.startsWith("wlan") || name.startsWith("swlan") ||
+                        name.startsWith("wifi"))) wifi=ip;
+                    else if (fallback==null) fallback=ip;
                 }
             }
         } catch (Exception ignored) {}
-        return "127.0.0.1";
+        return wifi!=null?wifi:(fallback!=null?fallback:"127.0.0.1");
     }
     public synchronized void shutdown() {
         running=false;
