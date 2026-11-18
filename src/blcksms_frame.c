@@ -63,7 +63,7 @@ static int decode(const char *text,size_t count,
     *written=j;return 0;
 }
 int blcksms_frame_pack(const uint8_t *sealed,size_t sealed_len,
-                       const char id[BLCKSMS_ID_TEXT],
+                       const char *id,
                        char out[][BLCKSMS_FRAME_TEXT],
                        size_t available,size_t *frame_count) {
     char encoded[BLCKSMS_PARTS_MAX*BLCKSMS_PART_BYTES+1u];
