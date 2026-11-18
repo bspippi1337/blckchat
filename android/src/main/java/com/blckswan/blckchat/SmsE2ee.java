@@ -8,6 +8,7 @@ import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -185,6 +186,63 @@ public final class SmsE2ee {
         if(!store.edit().remove(PEER).remove(VERIFIED).remove(SEEN).commit())
             throw new IllegalStateException("Kunne ikke nullstille kontakten");
     }
+    /**
+     * Tests the ACTUAL Android Keystore ECDH provider against an ephemeral
+     * software EC key, then confirms HKDF and AES-GCM interoperate.
+     * No peer or SMS is touched. A pass is not proof of group security.
+     */
+    public void runDeviceSelfTest() throws Exception {
+        KeyPairGenerator generator=KeyPairGenerator.getInstance("EC");
+        generator.initialize(new ECGenParameterSpec("secp256r1"),RNG);
+        KeyPair ephemeral=generator.generateKeyPair();
+        byte[] mine=publicKey.getEncoded();
+        byte[] other=ephemeral.getPublic().getEncoded();
+        KeyStore ks=KeyStore.getInstance("AndroidKeyStore");
+        ks.load(null);
+        java.security.PrivateKey persistent=(java.security.PrivateKey)ks.getKey(ALIAS,null);
+        if(persistent==null)throw new SecurityException("Android Keystore-nøkkel mangler");
+        KeyAgreement left=KeyAgreement.getInstance("ECDH","AndroidKeyStore");
+        left.init(persistent);
+        left.doPhase(ephemeral.getPublic(),true);
+        byte[] a=left.generateSecret();
+        KeyAgreement right=KeyAgreement.getInstance("ECDH");
+        right.init(ephemeral.getPrivate());
+        right.doPhase(publicKey,true);
+        byte[] b=right.generateSecret();
+        byte[] fromA=null,fromB=null;
+        try {
+            if(!MessageDigest.isEqual(a,b))
+                throw new SecurityException("ECDH-selvtest mislyktes");
+            fromA=SmsCryptoPrimitives.directionKey(a,mine,other,mine);
+            fromB=SmsCryptoPrimitives.directionKey(b,other,mine,mine);
+            if(!MessageDigest.isEqual(fromA,fromB))
+                throw new SecurityException("HKDF-selvtest mislyktes");
+            String id="00000000000000000000000000000042";
+            byte[] ad=SmsCryptoPrimitives.associatedData(mine,other,id);
+            byte[] nonce=new byte[12];RNG.nextBytes(nonce);
+            Cipher cipher=Cipher.getInstance("AES/GCM/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE,new SecretKeySpec(fromA,"AES"),
+                        new GCMParameterSpec(128,nonce));
+            cipher.updateAAD(ad);
+            byte[] content="BLCKCHAT42 self-test"
+                .getBytes(StandardCharsets.UTF_8);
+            byte[] sealed=cipher.doFinal(content);
+            cipher.init(Cipher.DECRYPT_MODE,new SecretKeySpec(fromB,"AES"),
+                        new GCMParameterSpec(128,nonce));
+            cipher.updateAAD(SmsCryptoPrimitives.associatedData(other,mine,id));
+            byte[] opened=cipher.doFinal(sealed);
+            if(!MessageDigest.isEqual(content,opened))
+                throw new SecurityException("AES-GCM-selvtest mislyktes");
+            Arrays.fill(opened,(byte)0);
+            Arrays.fill(content,(byte)0);
+        } finally {
+            Arrays.fill(a,(byte)0);
+            Arrays.fill(b,(byte)0);
+            if(fromA!=null)Arrays.fill(fromA,(byte)0);
+            if(fromB!=null)Arrays.fill(fromB,(byte)0);
+        }
+    }
+
     private byte[] deriveKey(byte[] senderPublic) throws Exception {
         if(!verified())throw new SecurityException("Sammenlign sikkerhetskoden først");
         byte[] peer=peerBytes();
