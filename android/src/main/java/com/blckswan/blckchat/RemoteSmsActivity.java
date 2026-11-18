@@ -321,7 +321,7 @@ public final class RemoteSmsActivity extends Activity {
                 +"og sammenligne sikkerhetskoden på nytt. Lokal egen nøkkel beholdes.")
             .setNegativeButton("Avbryt",null)
             .setPositiveButton("Fjern paring",(d,w)->{
-                try{crypto.forgetPeer();peerCode.setText("");
+                try{crypto.forgetPeer();inbox.clear();peerCode.setText("");
                     decrypted.setText("Ingen melding dekryptert.");
                     updatePairing();status("Paring fjernet.");
                 }catch(Exception e){showFailure(e);}
