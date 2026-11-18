@@ -89,7 +89,7 @@
   line-height:1.7;
   color:var(--muted);
   max-width:495px;
-  margin:0 0 28px;
+  margin:0 0 13px;
 }
 .brand-story strong{color:var(--text);font-weight:650}
 @keyframes bm-insert-gap{
@@ -138,6 +138,45 @@
 }
 @media(max-width:380px){
   .brand-motion{font-size:28px}
+}
+
+/* An accessible encore. Reduced-motion users get a still BLACK HAT reveal. */
+.bm-replay{
+  display:inline-flex;
+  gap:10px;
+  align-items:center;
+  width:max-content;
+  margin:0 0 29px;
+  padding:9px 13px;
+  border:1px solid rgba(112,237,209,.28);
+  border-radius:999px;
+  background:rgba(112,237,209,.055);
+  color:var(--muted);
+  font:700 10px/1.3 ui-monospace,"SFMono-Regular",Consolas,monospace;
+  letter-spacing:.11em;
+  cursor:pointer;
+  transition:border-color .18s ease,color .18s ease,background .18s ease;
+}
+.bm-replay span{color:var(--accent);font-size:18px;line-height:.6}
+.bm-replay:hover{
+  color:var(--text);
+  border-color:var(--accent);
+  background:rgba(112,237,209,.12);
+}
+.bm-replay:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.brand-motion.bm-static-blackhat .bm-wordmark,
+.brand-motion.bm-static-blackhat .bm-flying-a{display:none!important}
+.brand-motion.bm-static-blackhat .bm-blackhat{
+  display:inline-flex!important;opacity:1!important;
+  transform:none!important;animation:none!important;
+}
+.brand-motion.bm-static-blackhat .bm-fedora{
+  display:block!important;opacity:1!important;
+  transform:translate(-50%,0) rotate(-4deg)!important;
+  animation:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+  .bm-replay{transition:none!important}
 }
 
 /* Calm, novice-first two-step onboarding. */
