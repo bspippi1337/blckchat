@@ -8,9 +8,9 @@ static blck_authz_session session(const char *name, blck_role role) {
     s.role=role; s.expires_at=300; s.verified=1; return s;
 }
 int main(void) {
-    blck_authz_session pippi=session("Pippi",BLCK_ROLE_ADMIN);
-    blck_authz_session trond=session("Trond",BLCK_ROLE_MEMBER);
-    blck_authz_session thomas=session("Thomas",BLCK_ROLE_MEMBER);
+    blck_authz_session pippi=session("PhoneA",BLCK_ROLE_ADMIN);
+    blck_authz_session trond=session("PhoneB",BLCK_ROLE_MEMBER);
+    blck_authz_session thomas=session("PhoneC",BLCK_ROLE_MEMBER);
     blck_authz_session guest=session("NewGuest",BLCK_ROLE_INVITED);
     assert(blck_authorized(&pippi,"workshop",BLCK_ACT_INVITE,200));
     assert(blck_authorized(&pippi,"workshop",BLCK_ACT_POST,200));
@@ -28,6 +28,6 @@ int main(void) {
     assert(!blck_authorized(NULL,"workshop",BLCK_ACT_POST,200));
     assert(!blck_authorized(&pippi,"workshop",(blck_action)99,200));
     assert(!blck_authorized(&pippi,"",BLCK_ACT_READ,200));
-    puts("PASS authz: Pippi/Trond/Thomas");
+    puts("PASS authz: PhoneA/PhoneB/PhoneC");
     return 0;
 }
