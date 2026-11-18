@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- LAN legacy module exists in source, but SMS mode does not require Wi-Fi. -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <!-- No SEND_SMS permission. Invitations open the user's SMS composer. -->
     <uses-feature android:name="android.hardware.telephony" android:required="false"/>
-    <application android:label="BLCKCHAT 42" android:icon="@drawable/blck_logo" android:roundIcon="@drawable/blck_logo" android:theme="@android:style/Theme.Material.NoActionBar"
+    <application android:label="BLCKCHAT 42" android:icon="@drawable/blck_logo"
+        android:roundIcon="@drawable/blck_logo"
+        android:theme="@android:style/Theme.Material.NoActionBar"
         android:usesCleartextTraffic="false" android:allowBackup="false"
         android:extractNativeLibs="true">
-        <activity android:name=".MainActivity" android:exported="true"
+        <activity android:name=".MainActivity" android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".RemoteSmsActivity" android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.intent.action.SEND"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="blckchat" android:host="join"/>
+                <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>
     </application>
