@@ -91,6 +91,30 @@ public final class SmsAndroidInstrumentedTest {
         assertTrue("Tampered P-256 point must be rejected",rejected);
     }
 
+    @Test public void encryptedSmsDraftSurvivesRestartAndRejectsOverwrite() {
+        Context context=InstrumentationRegistry.getInstrumentation().getTargetContext();
+        SmsDraftStore store=new SmsDraftStore(context);
+        store.clear();
+        String id="00112233445566778899aabbccddeeff";
+        String secondId="ffeeddccbbaa99887766554433221100";
+        byte[] sealed=new byte[64];
+        Arrays.fill(sealed,(byte)0x5a);
+        String first=NativeSmsCodec.pack(sealed,id);
+        String other=NativeSmsCodec.pack(sealed,secondId);
+        assertNotNull(first);
+        assertNotNull(other);
+        store.remember(first);
+        assertEquals(first,new SmsDraftStore(context).pending());
+        store.remember(first); // same ciphertext is idempotent
+        boolean rejected=false;
+        try{store.remember(other);}catch(IllegalStateException expected){
+            rejected=true;
+        }
+        assertTrue("Must not overwrite an unconfirmed ciphertext",rejected);
+        store.clear();
+        assertNull(new SmsDraftStore(context).pending());
+    }
+
     @Test public void appDoesNotRequestSmsOrInternetPermissions() throws Exception {
         Context context=InstrumentationRegistry.getInstrumentation().getTargetContext();
         PackageInfo info=context.getPackageManager().getPackageInfo(
