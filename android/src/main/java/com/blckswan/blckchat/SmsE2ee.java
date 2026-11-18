@@ -7,6 +7,7 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.util.Base64;
 import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyFactory;
@@ -17,6 +18,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECFieldFp;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
@@ -128,13 +130,30 @@ public final class SmsE2ee {
         check.initialize(new ECGenParameterSpec("secp256r1"));
         ECParameterSpec wanted=((ECPublicKey)check.generateKeyPair().getPublic()).getParams();
         ECParameterSpec got=ec.getParams();
-        if(got.getCurve().getField().getFieldSize()!=256 ||
+        if(!(got.getCurve().getField() instanceof ECFieldFp) ||
+           !got.getCurve().getField().equals(wanted.getCurve().getField()) ||
            !got.getCurve().getA().equals(wanted.getCurve().getA()) ||
            !got.getCurve().getB().equals(wanted.getCurve().getB()) ||
            !got.getGenerator().equals(wanted.getGenerator()) ||
            !got.getOrder().equals(wanted.getOrder()) ||
            got.getCofactor()!=wanted.getCofactor())
-           throw new SecurityException("Nøkkelen bruker feil kurve");
+            throw new SecurityException("Nøkkelen bruker feil kurve");
+        // Independently reject infinity, out-of-field and off-curve points
+        // before handing an untrusted peer key to Android Keystore.
+        java.security.spec.ECPoint point=ec.getW();
+        if(point==null || java.security.spec.ECPoint.POINT_INFINITY.equals(point))
+            throw new SecurityException("Ugyldig EC-punkt");
+        BigInteger p=((ECFieldFp)got.getCurve().getField()).getP();
+        BigInteger x=point.getAffineX(),y=point.getAffineY();
+        if(x==null||y==null||x.signum()<0||y.signum()<0||
+           x.compareTo(p)>=0||y.compareTo(p)>=0)
+            throw new SecurityException("EC-punkt utenfor feltet");
+        BigInteger left=y.multiply(y).mod(p);
+        BigInteger right=x.multiply(x).mod(p).multiply(x)
+            .add(got.getCurve().getA().multiply(x))
+            .add(got.getCurve().getB()).mod(p);
+        if(!left.equals(right))
+            throw new SecurityException("EC-punktet ligger ikke på kurven");
         return key;
     }
     private byte[] peerBytes() throws Exception {
