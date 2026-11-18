@@ -42,7 +42,11 @@ Dette er ikke en sikkerhetsrevidert messenger. Begge telefonene trenger Android 
 <h2 style="margin-top:0">Åpne nøkkelen i appen</h2>
 <p>Har du installert appen? Trykk knappen for å åpne BLCKCHAT med Phone A sin offentlige nøkkel ferdig utfylt. Du må fortsatt trykke «Importer» og sammenligne sikkerhetskoden over en telefonsamtale før kryptering aktiveres.</p>
 <a id="pair-open-app" href="#" class="button primary">Åpne BLCKCHAT med invitasjonen</a>
-<p id="pair-fallback" class="helper">Hvis knappen ikke åpner appen, kopier den offentlige BC42K-koden fra SMS-invitasjonen og lim den inn manuelt i BLCKCHAT.</p>
+<p id="pair-fallback" class="helper">Hvis Android ikke åpner appen automatisk, trykk «Kopier offentlig nøkkel». Åpne deretter BLCKCHAT selv, lim den inn i feltet «LIM INN MOTTAKERS BC42K-KODE» og trykk «Importer». Sikkerhetskoden må fortsatt sammenlignes over telefon.</p>
+<button type="button" class="button secondary" id="pair-copy-key">Kopier offentlig nøkkel</button>
+<p id="pair-copy-status" class="helper" role="status" aria-live="polite"></p>
+<label class="helper" for="pair-key-text" id="pair-key-label" hidden>Offentlig nøkkelkode, kan markeres og kopieres manuelt:</label>
+<textarea id="pair-key-text" rows="3" readonly hidden aria-label="Offentlig BLCKCHAT nøkkelkode" spellcheck="false" autocapitalize="off" autocomplete="off" style="width:100%;min-height:92px;margin-top:8px;padding:12px;border:1px solid #344550;border-radius:12px;color:#e5f4ef;background:#101b22;overflow-wrap:anywhere"></textarea>
 </section>
 <section class="portal-help">
 <h2>Deretter: send og les meldinger</h2>
@@ -70,6 +74,28 @@ Dette er ikke en sikkerhetsrevidert messenger. Begge telefonene trenger Android 
   if(!/^[A-Za-z0-9_-]{100,160}$/.test(key))return;
   const target=document.getElementById("pair-open-app");
   target.setAttribute("href","blckchat://pair?k="+encodeURIComponent(key));
+  const publicCode="BC42K|1|"+key;
+  const input=document.getElementById("pair-key-text");
+  const label=document.getElementById("pair-key-label");
+  const note=document.getElementById("pair-copy-status");
+  const showManual=()=>{
+    input.hidden=false;
+    label.hidden=false;
+    input.focus();
+    input.select();
+  };
+  input.value=publicCode;
+  document.getElementById("pair-copy-key").addEventListener("click",async()=>{
+    try{
+      if(!navigator.clipboard || !navigator.clipboard.writeText)
+        throw new Error("Clipboard access not available");
+      await navigator.clipboard.writeText(publicCode);
+      note.textContent="Offentlig nøkkel kopiert. Åpne appen og lim den inn i nøkkelfeltet.";
+    }catch(_){
+      showManual();
+      note.textContent="Merk og kopier nøkkelkoden fra feltet under, og lim den inn i appen.";
+    }
+  });
   document.getElementById("pair-invite").hidden=false;
 })();
 </script>
