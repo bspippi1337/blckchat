@@ -1,0 +1,33 @@
+#include "blckauthz.h"
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+static blck_session session(const char *name, blck_role role) {
+    blck_session s={0};
+    (void)strcpy(s.room,"workshop"); (void)strcpy(s.subject,name);
+    s.role=role; s.expires_at=300; s.verified=1; return s;
+}
+int main(void) {
+    blck_session pippi=session("Pippi",BLCK_ROLE_ADMIN);
+    blck_session trond=session("Trond",BLCK_ROLE_MEMBER);
+    blck_session thomas=session("Thomas",BLCK_ROLE_MEMBER);
+    blck_session guest=session("NewGuest",BLCK_ROLE_INVITED);
+    assert(blck_authorized(&pippi,"workshop",BLCK_ACT_INVITE,200));
+    assert(blck_authorized(&pippi,"workshop",BLCK_ACT_POST,200));
+    assert(blck_authorized(&trond,"workshop",BLCK_ACT_POST,200));
+    assert(blck_authorized(&thomas,"workshop",BLCK_ACT_READ,200));
+    assert(!blck_authorized(&trond,"workshop",BLCK_ACT_INVITE,200));
+    assert(!blck_authorized(&thomas,"workshop",BLCK_ACT_REMOVE,200));
+    assert(!blck_authorized(&trond,"other-room",BLCK_ACT_READ,200));
+    assert(!blck_authorized(&guest,"workshop",BLCK_ACT_READ,200));
+    assert(!blck_authorized(&trond,"workshop",BLCK_ACT_POST,300));
+    trond.revoked=1;
+    assert(!blck_authorized(&trond,"workshop",BLCK_ACT_READ,200));
+    thomas.verified=0;
+    assert(!blck_authorized(&thomas,"workshop",BLCK_ACT_POST,200));
+    assert(!blck_authorized(NULL,"workshop",BLCK_ACT_POST,200));
+    assert(!blck_authorized(&pippi,"workshop",(blck_action)99,200));
+    assert(!blck_authorized(&pippi,"",BLCK_ACT_READ,200));
+    puts("PASS authz: Pippi/Trond/Thomas");
+    return 0;
+}
