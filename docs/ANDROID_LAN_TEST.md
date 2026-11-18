@@ -5,25 +5,42 @@ It has real encrypted local Wi-Fi messaging and an SMS-composer invite,
 but is **not GitHub-backed**, **not end-to-end encrypted**, has no durable
 history, and hasn't passed a third-party audit. Do not use for sensitive data.
 
-## Install
+## Install without a GitHub account
 
-1. Open [GitHub Actions](https://github.com/bspippi1337/blckchat/actions/workflows/android-test.yml).
-2. Open the most recent **successful** `Android LAN Messenger internal APK` run.
-3. Under **Artifacts**, download `blckchat-internal-lan-debug-apk` (ZIP).
-   GitHub may require you to sign in.
-4. Unzip the file, tap the `android-debug.apk` file on the phone.
-5. Allow installation from the app/browser you used to open the APK,
-   then install. Do not switch off Android's scanning or protection.
-6. Launch **BLCKCHAT 42**.
+**Trond and Thomas:** Open the SMS invite link Pippi sends. The two-step
+Norwegian guide at https://bspippi1337.github.io/blckchat/join.html
+offers the official test APK at:
 
-**A failed or incomplete GitHub Actions run means no verified APK.**
-Never install an APK that someone sent from an unknown source.
+https://bspippi1337.github.io/blckchat/downloads/blckchat-lan-alpha.apk
+
+1. Tap **Last ned Android-appen** and open the downloaded APK.
+2. If Android asks permission to install from this browser, allow it
+   for this one installation, then turn that permission off afterwards.
+3. Do not disable Play Protect. Stop if there is a malware warning.
+4. Open the SAME invitation SMS link again and tap **Åpne BLCKCHAT**.
+5. Enter your name (Trond/Thomas) and tap **BLI MED I SAMTALEN**.
+
+No GitHub, BankID or server fields required. Both phones must be on the
+same Wi-Fi/hotspot as Pippi. If installation exceeds the invite's
+ten-minute lifetime, ask Pippi for a new invite. The public Pages link
+is a **test APK, not a production secure messenger**.
+
+**Pippi:** Install from the same official website, launch BLCKCHAT,
+use your name and tap **ÅPNE ROM SOM ADMIN**.
+
+The GitHub Pages deployment builds the APK, checks its signature,
+and publishes SHA-256 information in
+`/blckchat/downloads/SHA256SUMS.txt`. A failed deployment must not
+be assumed to have updated the public binary. The separate Actions
+artifact is a developer fallback:
+
+https://github.com/bspippi1337/blckchat/actions/workflows/android-test.yml
 
 ## Actual phone A test
 
 1. Choose display name `Pippi`.
 2. Tap **OPEN A ROOM · ADMIN**.
-3. Confirm that status changes to `Connected to 127.0.0.1 · Pippi`.
+3. Confirm the local server starts and the app reports a connected Pippi session.
 4. Write `Pippi test 42` and tap the upward send arrow.
 5. The same message should reappear in the conversation as
    **PIPPI: Pippi test 42**. This tests the actual local encrypted
