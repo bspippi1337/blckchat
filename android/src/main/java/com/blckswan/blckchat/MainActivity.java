@@ -197,21 +197,28 @@ public final class MainActivity extends Activity implements LanChat.Events {
 
     private void showLobby() {
         root(true);
-        header("BLCKCHAT / INTERNAL ALPHA","A conversation, distilled.",
-            "Actual encrypted messages over the same Wi-Fi. This internal build is not the final GitHub messenger or audited E2EE.");
-        nameField=field("YOUR DISPLAY NAME","Pippi / Trond / Thomas",pendingHost.isEmpty()?"Pippi":"");
-        if (pendingHost.isEmpty()) {
-            addButton(button("OPEN A ROOM  ·  ADMIN",accent,BG,v->startHosting()),24);
+        boolean invited=!pendingHost.isEmpty() && !pendingId.isEmpty() && !pendingKey.isEmpty();
+        if (invited) {
+            header("BLCKCHAT / INVITASJON","Velkommen!",
+                "Pippi har invitert deg til The Workshop. Skriv navnet ditt og trykk Bli med. Du trenger ingen konto.");
+            nameField=field("HVA HETER DU?","Trond eller Thomas","");
+            addButton(button("BLI MED I SAMTALEN",accent,BG,v->startJoining()),24);
+            note("Begge telefonene må være på samme Wi-Fi eller Pippis hotspot. Invitasjonen kan bare brukes én gang, og varer i 10 minutter.",24);
+        } else {
+            header("BLCKCHAT / INTERN ALFA","En samtale, uten omveier.",
+                "Pippi åpner rommet. Trond og Thomas kommer inn fra SMS-invitasjonen. Dette er en lokal test, ikke ferdig E2EE.");
+            nameField=field("VISNINGSNAVN","Pippi","Pippi");
+            addButton(button("ÅPNE ROM SOM ADMIN",accent,BG,v->startHosting()),24);
+            note("Gjester trenger bare åpne SMS-lenken sin. For manuell tilkobling kan du fylle inn feltene under.",24);
+            hostField=field("VERTENS WI-FI-ADRESSE","192.168.1.42","");
+            idField=field("INVITASJONS-ID","Fra SMS-lenken","");
+            keyField=field("INVITASJONSNØKKEL","Fra SMS-lenken","");
+            addButton(button("KOBLE TIL MANUELT",ELEVATED,LIGHT,v->startJoining()),16);
         }
-        hostField=field("HOST PHONE'S WI-FI ADDRESS","e.g. 192.168.1.42",pendingHost);
-        idField=field("INVITATION ID","from SMS link",pendingId);
-        keyField=field("INVITATION SECRET","from SMS link",pendingKey);
-        addButton(button("JOIN THIS ROOM",ELEVATED,LIGHT,v->startJoining()),18);
-        note("A: Open room on Pippi's phone. B and C: Join from the SMS invitation while connected to the same Wi-Fi. The host phone must remain open and awake.",23);
-        TextView support=button("VIEW INVITATION GUIDE",PANEL,accent,v->
+        TextView support=button("ENKEL BRUKSANVISNING",PANEL,accent,v->
             startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(
                 "https://bspippi1337.github.io/blckchat/guide.html"))));
-        addButton(support,16);
+        addButton(support,18);
     }
 
     private void startHosting() {
@@ -236,16 +243,18 @@ public final class MainActivity extends Activity implements LanChat.Events {
 
     private void startJoining() {
         String name=nameField.getText().toString().trim();
-        String host=hostField.getText().toString().trim();
-        String id=idField.getText().toString().trim();
-        String key=keyField.getText().toString().trim();
+        boolean invited=!pendingHost.isEmpty() && !pendingId.isEmpty() && !pendingKey.isEmpty();
+        String host=invited?pendingHost:hostField.getText().toString().trim();
+        String id=invited?pendingId:idField.getText().toString().trim();
+        String key=invited?pendingKey:keyField.getText().toString().trim();
         if (!LanChat.safeName(name)) {
             nameField.setError("Choose a display name");
             return;
         }
         if (!host.matches("[0-9.]{7,15}") || !id.matches("[A-Za-z0-9_-]{16,64}") ||
             !key.matches("[A-Za-z0-9_-]{40,64}")) {
-            hostField.setError("Open the complete invitation link or enter its details");
+            if (invited) nameField.setError("Ugyldig invitasjon. Be Pippi om en ny SMS.");
+            else hostField.setError("Åpne hele invitasjonslenken eller fyll inn feltene.");
             return;
         }
         admin=false;
