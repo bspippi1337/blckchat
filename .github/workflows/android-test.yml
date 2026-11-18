@@ -25,12 +25,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
       - name: Install SDK and NDK
-        run: sdkmanager --install "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.2.12479018"
+        run: |
+          echo "SDK root: ${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          sdkmanager --install "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.2.12479018"
       - name: Assemble internal test APK
         run: gradle --no-daemon --stacktrace :android:assembleDebug
       - name: Save installable test APK
