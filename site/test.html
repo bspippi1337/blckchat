@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090e15">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="BLCKCHAT testlaboratorium for Phone A og Phone B, uten konto eller personopplysninger.">
+<title>Testlaboratorium · BLCKCHAT 42</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Hopp til testen</a>
+<header class="nav shell">
+  <a href="./" class="identity"><img src="icon.svg" width="34" height="34" alt="">BLCK/CHAT <sup>42</sup></a>
+  <nav aria-label="Meny">
+    <a href="./">Hjem</a>
+    <a href="join.html">Installer</a>
+    <a href="guide.html">Bruksanvisning</a>
+    <a href="security.html">Sikkerhet</a>
+  </nav>
+</header>
+<main id="main" class="doc shell">
+<p class="kicker">BLCKCHAT 42 / FIELD TEST</p>
+<h1>To telefoner. Ett kontrollert forsøk.</h1>
+<p class="lede">Test Phone A (Admin) og Phone B over vanlig SMS, fra ulike steder. Kryss av etter hvert som dere <strong>faktisk har gjennomført</strong> et steg. Ingen GitHub-konto eller felles Wi-Fi er nødvendig.</p>
+<p class="notice"><strong>Eksperimentell test, ikke sikker messenger for sensitiv bruk.</strong> Test bare med ufarlig tekst. Begge må ha Android 12 eller nyere. Sammenlign sikkerhetskoden over en separat, pålitelig telefonsamtale. Standard SMS-kostnader kan påløpe, også for flere SMS-deler.</p>
+
+<section class="test-progress-panel" aria-labelledby="progress-heading">
+  <p class="kicker">TESTSTATUS</p>
+  <h2 id="progress-heading"><span id="completed-count">0</span> av <span id="total-count">9</span> kontrollpunkter</h2>
+  <div class="test-progress-track" role="progressbar" aria-label="Testfremdrift" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0" id="test-progress">
+    <div id="test-progress-fill"></div>
+  </div>
+  <p class="helper" id="progress-summary" role="status" aria-live="polite">Klar til å starte testen.</p>
+</section>
+
+<section class="test-phase" aria-labelledby="setup-title">
+  <p class="kicker">FASEN 01</p>
+  <h2 id="setup-title">Installasjon og nøkkelkontroll</h2>
+  <div class="test-items">
+    <label class="test-item"><input type="checkbox" data-test-id="install"><span><strong>Begge har installert BLCKCHAT SMS-test</strong><small>Bruk den samme offisielle <a href="join.html">nedlastingssiden</a> på Phone A og Phone B.</small></span></label>
+    <label class="test-item"><input type="checkbox" data-test-id="selftest"><span><strong>Krypto-selvtest er bestått på begge telefonene</strong><small>Kjør den innebygde Keystore- og AES-GCM-testen.</small></span></label>
+    <label class="test-item"><input type="checkbox" data-test-id="pair"><span><strong>Begge har mottatt og importert den andres offentlige nøkkel</strong><small>SMS-lenken kan åpnes på nytt etter installasjon. Bruk «Kopier offentlig nøkkel» dersom appen ikke åpnes automatisk.</small></span></label>
+    <label class="test-item"><input type="checkbox" data-test-id="verify"><span><strong>Begge har sammenlignet samme sikkerhetskode muntlig</strong><small>Kontroller koden tegn for tegn via en uavhengig telefonsamtale. Ikke kryss av ved ulik kode.</small></span></label>
+  </div>
+</section>
+
+<section class="test-phase" aria-labelledby="message-title">
+  <p class="kicker">FASEN 02</p>
+  <h2 id="message-title">Virkelig SMS over avstand</h2>
+  <div class="test-items">
+    <label class="test-item"><input type="checkbox" data-test-id="out-a"><span><strong>Phone A har sendt en kryptert testmelding</strong><small>Trykk «SEND KRYPTERT SMS», send hver SMS-del i meldingsappen og bekreft delene manuelt.</small></span></label>
+    <label class="test-item"><input type="checkbox" data-test-id="in-b"><span><strong>Phone B har mottatt og dekryptert riktig klartekst</strong><small>Bruk «Del» fra SMS-appen eller kopier de krypterte delene inn i BLCKCHAT.</small></span></label>
+    <label class="test-item"><input type="checkbox" data-test-id="out-b"><span><strong>Phone B har sendt et kryptert svar</strong><small>Telefonene skal ikke være på samme Wi-Fi.</small></span></label>
+    <label class="test-item"><input type="checkbox" data-test-id="in-a"><span><strong>Phone A har dekryptert svaret korrekt</strong><small>En grønn lokal selvtest er ikke nok. Dette punktet krever faktisk SMS mellom de to telefonene.</small></span></label>
+  </div>
+</section>
+
+<section class="test-phase" aria-labelledby="safety-title">
+  <p class="kicker">FASEN 03</p>
+  <h2 id="safety-title">Sikkerhetskontroll</h2>
+  <div class="test-items">
+    <label class="test-item"><input type="checkbox" data-test-id="replay"><span><strong>Duplikat av en allerede dekryptert melding avvises</strong><small>Importer nøyaktig samme krypterte melding på nytt. Den skal ikke vises to ganger.</small></span></label>
+  </div>
+</section>
+
+<section class="test-report" aria-labelledby="report-title">
+  <p class="kicker">RAPPORT / UTEN PERSONOPPLYSNINGER</p>
+  <h2 id="report-title">Kopier testresultatet</h2>
+  <p>Rapporten inneholder kun avkrysninger, appversjon og tidspunkt. Ikke legg ved telefonnumre, offentlige nøkler, sikkerhetskoder, private meldinger eller skjermbilder av dem.</p>
+  <div class="test-actions">
+    <button type="button" class="button primary" id="copy-report">Kopier anonym testrapport</button>
+    <button type="button" class="button secondary" id="reset-tests">Nullstill avkrysningene</button>
+  </div>
+  <p class="helper" id="test-report-status" role="status" aria-live="polite"></p>
+  <textarea id="test-report-fallback" readonly hidden aria-label="Testrapport for manuell kopiering" rows="10" spellcheck="false"></textarea>
+</section>
+<p class="fine">Teststatusen lagres kun i denne nettleseren, uten konto og uten opplasting. <a href="guide.html">Full bruksanvisning</a> · <a href="security.html">Sikkerhetsbegrensninger</a></p>
+</main>
+<script src="test.js" defer></script>
+</body>
+</html>
