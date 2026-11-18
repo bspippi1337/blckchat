@@ -91,10 +91,12 @@ public final class SmsAndroidInstrumentedTest {
         assertTrue("Tampered P-256 point must be rejected",rejected);
     }
 
-    @Test public void encryptedSmsDraftSurvivesRestartAndRequiresPerPartConfirmation() {
+    @Test public void encryptedSmsDraftBindsDestinationAndSurvivesRestart() {
         Context context=InstrumentationRegistry.getInstrumentation().getTargetContext();
         SmsDraftStore store=new SmsDraftStore(context);
         store.clear();
+        String phoneA="+4799999901",phoneB="+4799999902";
+        String peerA="a".repeat(64),peerB="b".repeat(64);
         String id="00112233445566778899aabbccddeeff";
         String secondId="ffeeddccbbaa99887766554433221100";
         byte[] sealed=new byte[240];
@@ -105,28 +107,41 @@ public final class SmsAndroidInstrumentedTest {
         assertNotNull(other);
         int expected=first.split("\\n").length;
         assertTrue("Must exercise multiple SMS segments",expected>1);
-        store.remember(first);
+        store.remember(first,phoneA,peerA);
         assertEquals(first,new SmsDraftStore(context).pending());
-        store.remember(first); // same ciphertext is idempotent
+        store.remember(first,phoneA,peerA);
         assertEquals(0,store.currentPartIndex());
         assertEquals(expected,store.partCount());
         String[] parts=first.split("\\n");
         assertEquals(parts[0],store.currentPart());
         boolean rejected=false;
-        try{store.remember(other);}catch(IllegalStateException exception){
-            rejected=true;
-        }
-        assertTrue("Must not overwrite an unconfirmed ciphertext",rejected);
+        try{store.remember(other,phoneA,peerA);}
+        catch(IllegalStateException exception){rejected=true;}
+        assertTrue("Cannot overwrite unconfirmed ciphertext",rejected);
+        rejected=false;
+        try{store.verifyRecipient(phoneB,peerA);}
+        catch(SecurityException exception){rejected=true;}
+        assertTrue("Reject phone number replacement",rejected);
+        rejected=false;
+        try{store.verifyRecipient(phoneA,peerB);}
+        catch(SecurityException exception){rejected=true;}
+        assertTrue("Reject verified contact key replacement",rejected);
+        rejected=false;
+        try{store.confirmCurrentPart(phoneB,peerA);}
+        catch(SecurityException exception){rejected=true;}
+        assertTrue("Cannot confirm for wrong phone",rejected);
+        assertEquals(0,store.currentPartIndex());
         for(int i=0;i<expected;i++) {
             SmsDraftStore reopened=new SmsDraftStore(context);
+            reopened.verifyRecipient(phoneA,peerA);
             assertEquals(i,reopened.currentPartIndex());
             assertEquals(parts[i],reopened.currentPart());
-            boolean finished=reopened.confirmCurrentPart();
+            boolean finished=reopened.confirmCurrentPart(phoneA,peerA);
             if(i+1<expected) {
-                assertFalse("Do not mark finished before final frame",finished);
+                assertFalse("Cannot finish before final SMS frame",finished);
                 assertEquals(i+1,new SmsDraftStore(context).currentPartIndex());
             }else {
-                assertTrue("Final explicit user confirmation clears draft",finished);
+                assertTrue("Final confirmation clears draft",finished);
             }
         }
         assertNull(new SmsDraftStore(context).pending());
