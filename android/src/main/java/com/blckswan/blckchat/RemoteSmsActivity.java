@@ -50,6 +50,7 @@ public final class RemoteSmsActivity extends Activity {
     private TextView sendButton;
     private TextView outboxProgress;
     private TextView historyView;
+    private long historyEpoch=0L;
     private LinearLayout pairingPanel;
     private final List<View> conversationViews=new ArrayList<>();
     private TextView verificationPrompt;
@@ -264,11 +265,16 @@ public final class RemoteSmsActivity extends Activity {
             historyView.setText("Bekreft først sikkerhetskoden med mottakeren.");
             return;
         }
+        final long requestedEpoch=historyEpoch;
+        final String selectedPeer;
+        try {
+            selectedPeer=crypto.verifiedPeerHash();
+        }catch(Exception ex){showFailure(ex);return;}
         historyView.setText("Dekrypterer lokal historikk…");
         new Thread(()->{
             try{
                 java.util.List<SmsLocalHistory.Entry> entries=
-                    history.latest(crypto.verifiedPeerHash(),12);
+                    history.latest(selectedPeer,12);
                 StringBuilder output=new StringBuilder();
                 if(entries.isEmpty()){
                     output.append("Ingen lokalt lagrede meldinger ennå.");
@@ -284,7 +290,15 @@ public final class RemoteSmsActivity extends Activity {
                     }
                 }
                 String display=output.toString();
-                runOnUiThread(()->historyView.setText(display));
+                runOnUiThread(()->{
+                    try {
+                        // Never display a completed async read after the
+                        // peer was forgotten or history was deleted.
+                        if(requestedEpoch==historyEpoch && crypto.verified() &&
+                           selectedPeer.equals(crypto.verifiedPeerHash()))
+                            historyView.setText(display);
+                    }catch(Exception ignored){}
+                });
             }catch(Exception e){
                 runOnUiThread(()->{
                     historyView.setText("Den lokale historikken kunne ikke dekrypteres.");
@@ -303,6 +317,7 @@ public final class RemoteSmsActivity extends Activity {
             .setNegativeButton("Behold",null)
             .setPositiveButton("Slett historikk",(dialog,which)->{
                 try{
+                    historyEpoch++;
                     history.clear();
                     historyView.setText("Lokal samtalehistorikk er slettet.");
                     status("Krypterte historikkposter slettet.");
@@ -593,8 +608,9 @@ public final class RemoteSmsActivity extends Activity {
                 +"SMS-utkast slettes permanent. Egen Keystore-nøkkel beholdes.")
             .setNegativeButton("Avbryt",null)
             .setPositiveButton("Fjern paring",(d,w)->{
-                try{crypto.forgetPeer();inbox.clear();drafts.clear();history.clear();updateOutboxProgress();peerCode.setText("");
+                try{crypto.forgetPeer();inbox.clear();drafts.clear();historyEpoch++;history.clear();updateOutboxProgress();peerCode.setText("");
                     if(historyView!=null)historyView.setText("Samtalehistorikk slettet.");
+                    outgoing.setText("");incoming.setText("");
                     decrypted.setText("Ingen melding dekryptert.");
                     updatePairing();status("Paring fjernet.");
                 }catch(Exception e){showFailure(e);}
