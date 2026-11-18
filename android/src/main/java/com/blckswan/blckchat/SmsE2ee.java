@@ -42,13 +42,15 @@ public final class SmsE2ee {
     private static final String PREF="blckchat42_sms_peers_v1";
     private static final String PEER="verified_peer_public";
     private static final String VERIFIED="safety_verified";
-    private static final String SEEN="received_ids";
+    private static final String SEEN="received_ids"; // legacy rolling replay cache
+    private static final String LOCAL_IDENTITY="bound_local_identity";
     private static final String MARKER="BC42K|1|";
     private static final byte[] CONTEXT="BLCKCHAT42-SMS-E2EE-ALPHA1"
         .getBytes(StandardCharsets.US_ASCII);
     private static final SecureRandom RNG=new SecureRandom();
     private final Context app;
     private final SharedPreferences store;
+    private final SmsReplayStore replay;
     private final ECPublicKey publicKey;
 
     public SmsE2ee(Context ctx) throws Exception {
@@ -56,6 +58,7 @@ public final class SmsE2ee {
             throw new IllegalStateException("SMS-kryptering krever Android 12 eller nyere");
         app=ctx.getApplicationContext();
         store=app.getSharedPreferences(PREF,Context.MODE_PRIVATE);
+        replay=new SmsReplayStore(app);
         KeyStore ks=KeyStore.getInstance("AndroidKeyStore");
         ks.load(null);
         if(!ks.containsAlias(ALIAS)) {
@@ -72,6 +75,17 @@ public final class SmsE2ee {
         if(cert==null || !(cert.getPublicKey() instanceof ECPublicKey))
             throw new IllegalStateException("Android Keystore mangler EC-identitet");
         publicKey=(ECPublicKey)cert.getPublicKey();
+        // A restored preferences file must not silently trust a replaced
+        // or regenerated Android Keystore identity.
+        String current=encode(publicKey.getEncoded());
+        String previouslyBound=store.getString(LOCAL_IDENTITY,null);
+        if(!current.equals(previouslyBound)) {
+            SharedPreferences.Editor edit=store.edit()
+                .putString(LOCAL_IDENTITY,current)
+                .remove(PEER).remove(VERIFIED).remove(SEEN);
+            if(!edit.commit())
+                throw new IllegalStateException("Kunne ikke låse identiteten");
+        }
     }
 
     public static String encode(byte[] b) {
@@ -260,18 +274,26 @@ public final class SmsE2ee {
             Arrays.fill(ciphertext,(byte)0);
         }
     }
-    private boolean isSeen(String id) {
-        String history=store.getString(SEEN,"");
-        return (","+history+",").contains(","+id+",");
+    private String peerFingerprint() throws Exception {
+        byte[] hash=sha256(peerBytes());
+        StringBuilder out=new StringBuilder(hash.length*2);
+        for(byte b:hash) {
+            out.append(Character.forDigit((b&255)>>>4,16))
+               .append(Character.forDigit(b&15,16));
+        }
+        Arrays.fill(hash,(byte)0);
+        return out.toString();
     }
-    private void markSeen(String id) {
-        List<String> history=new ArrayList<>();
-        String existing=store.getString(SEEN,"");
-        if(!existing.isEmpty())Collections.addAll(history,existing.split(","));
-        history.add(id);
-        if(history.size()>256)
-            history=new ArrayList<>(history.subList(history.size()-256,history.size()));
-        if(!store.edit().putString(SEEN,android.text.TextUtils.join(",",history)).commit())
-            throw new IllegalStateException("Kunne ikke lagre replay-beskyttelse");
+    private boolean isSeen(String id) throws Exception {
+        // Keep the old cache read-only during migration to permanent SQLite.
+        String old=store.getString(SEEN,"");
+        if((","+old+",").contains(","+id+","))return true;
+        return replay.contains(peerFingerprint(),id);
+    }
+    private void markSeen(String id) throws Exception {
+        // Unique constraint closes concurrent replay races. Never rotate
+        // away an old authenticated ID just because >256 messages arrived.
+        if(!replay.record(peerFingerprint(),id))
+            throw new SecurityException("Meldingen er allerede lest");
     }
 }
