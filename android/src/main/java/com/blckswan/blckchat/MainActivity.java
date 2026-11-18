@@ -105,11 +105,19 @@ public final class MainActivity extends Activity implements LanChat.Events {
         base.addView(desc,dl);
         return title;
     }
-    private void root() {
+    private void root(boolean scrollable) {
         base=column();
         base.setBackgroundColor(BG);
         base.setPadding(dp(22),dp(30),dp(22),dp(18));
-        setContentView(base);
+        if (scrollable) {
+            ScrollView wrapper=new ScrollView(this);
+            wrapper.setFillViewport(true);
+            wrapper.setBackgroundColor(BG);
+            wrapper.addView(base);
+            setContentView(wrapper);
+        } else {
+            setContentView(base);
+        }
     }
     private TextView button(String value,int color,int fg,View.OnClickListener click) {
         TextView btn=text(value,14,fg,true);
@@ -188,7 +196,7 @@ public final class MainActivity extends Activity implements LanChat.Events {
     }
 
     private void showLobby() {
-        root();
+        root(true);
         header("BLCKCHAT / INTERNAL ALPHA","A conversation, distilled.",
             "Actual encrypted messages over the same Wi-Fi. This internal build is not the final GitHub messenger or audited E2EE.");
         nameField=field("YOUR DISPLAY NAME","Pippi / Trond / Thomas",pendingHost.isEmpty()?"Pippi":"");
@@ -248,7 +256,7 @@ public final class MainActivity extends Activity implements LanChat.Events {
     }
 
     private void showChat(boolean hosting) {
-        root();
+        root(false);
         header(hosting?"BLCKCHAT / PIPPI HOST":"BLCKCHAT / GUEST",
             "The Workshop",hosting?"Encrypted Wi-Fi group · This phone is the room host"
                 :"Private Wi-Fi room · Not production E2EE");
