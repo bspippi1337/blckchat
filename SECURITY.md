@@ -64,6 +64,19 @@ Android SMS Alpha 2 now contains a manually operated two-device messaging path:
   reading or sending permission is requested in the guest APK.
 - No LAN or internet connection is necessary for the SMS path.
 
+**Additional local storage defenses:** The SMS outbox stores only
+ciphertext segments and a Keystore-HMAC binding to both the intended
+E.164 phone number and the verified contact key fingerprint. Neither
+recipient number nor raw contact key is written into the draft cache.
+A different number or verified peer identity blocks retries and manual
+send confirmation. The local conversation journal uses a **distinct
+Android Keystore AES-GCM encryption key**, fresh IV and record-specific
+associated data per message. SQLite never stores message plaintext, but
+screen capture, a compromised running app or an unlocked phone remain
+possible exposure paths. Journal retention is capped at 300 records and
+can be deleted by the user. Old history is removed when the peer is
+forgotten. These are implementation controls, not an external audit.
+
 **Limitations:** This is static-pair ECDH, NOT the Signal protocol, Double
 Ratchet, MLS or forward-secret messaging. Compromise of a device's
 long-lived ECDH key exposes older captured SMS ciphertext for that peer.
