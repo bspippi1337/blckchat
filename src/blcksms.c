@@ -44,7 +44,7 @@ blcksms_result blcksms_invitation(
     n=snprintf(out->body,sizeof(out->body),
         "BLCKCHAT: Du er invitert! 1) Installer appen via "
         "https://bspippi1337.github.io/blckchat/join.html#i=%s "
-        "2) Aapne SMS-lenken igjen for aa bli med. Ingen GitHub-konto.",
+        "2) Åpne SMS-lenken igjen for å bli med. Ingen GitHub-konto.",
         invite_id);
     return finish(out,phone,n);
 }
