@@ -159,16 +159,8 @@ public final class SmsE2ee {
         return hasPeer() && store.getBoolean(VERIFIED,false);
     }
     public String safetyCode() throws Exception {
-        byte[] digest=sha256(join(CONTEXT,orderedKeys(publicKey.getEncoded(),peerBytes())));
-        StringBuilder out=new StringBuilder("42");
-        // First 10 digest bytes = 20 hex chars, grouped for a human voice check.
-        for(int i=0;i<10;i++){
-            if(i%2==0)out.append(' ');
-            int b=digest[i]&255;
-            out.append(Character.forDigit(b>>>4,16))
-               .append(Character.forDigit(b&15,16));
-        }
-        return out.toString().toUpperCase(java.util.Locale.ROOT);
+        return SmsCryptoPrimitives.safetyCode(
+            publicKey.getEncoded(),peerBytes());
     }
     public void setVerified(boolean checked) throws Exception {
         if(!hasPeer())throw new IllegalStateException("Ingen mottaker");
@@ -186,27 +178,20 @@ public final class SmsE2ee {
         ks.load(null);
         java.security.PrivateKey privateKey=(java.security.PrivateKey)ks.getKey(ALIAS,null);
         if(privateKey==null)throw new SecurityException("Lokal nøkkel mangler");
-        KeyAgreement agree=KeyAgreement.getInstance("ECDH","AndroidKeyStore");
-        agree.init(privateKey);
-        agree.doPhase(parsePublic(peer),true);
-        byte[] shared=agree.generateSecret();
-        // RFC 5869 HKDF-SHA256, extract then expand. JCA HMAC primitive.
-        byte[] salt=sha256(join(CONTEXT,orderedKeys(publicKey.getEncoded(),peer)));
-        Mac mac=Mac.getInstance("HmacSHA256");
-        mac.init(new SecretKeySpec(salt,"HmacSHA256"));
-        byte[] prk=mac.doFinal(shared);
-        Arrays.fill(shared,(byte)0);
-        mac.init(new SecretKeySpec(prk,"HmacSHA256"));
-        // The direction-specific key prevents ciphertext reflection.
-        byte[] key=mac.doFinal(join(CONTEXT,senderPublic,new byte[]{1}));
-        Arrays.fill(prk,(byte)0);
-        return key;
+        KeyAgreement agreement=KeyAgreement.getInstance("ECDH","AndroidKeyStore");
+        agreement.init(privateKey);
+        agreement.doPhase(parsePublic(peer),true);
+        byte[] shared=agreement.generateSecret();
+        try {
+            return SmsCryptoPrimitives.directionKey(shared,
+                publicKey.getEncoded(),peer,senderPublic);
+        }finally{
+            Arrays.fill(shared,(byte)0);
+        }
     }
     private byte[] aad(String id) throws Exception {
-        if(id==null || !id.matches("[0-9a-f]{32}"))
-            throw new SecurityException("Ugyldig meldings-ID");
-        return join(CONTEXT,orderedKeys(publicKey.getEncoded(),peerBytes()),
-                    id.getBytes(StandardCharsets.US_ASCII));
+        return SmsCryptoPrimitives.associatedData(
+            publicKey.getEncoded(),peerBytes(),id);
     }
     private static String randomId() {
         byte[] b=new byte[16];
